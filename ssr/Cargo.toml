@@ -1,0 +1,17 @@
+[package]
+name = "ssr"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+client = { path = "../client" }
+
+actix-web = "4"
+actix-web-static-files = "4"
+static-files = "0.2"
+yew = { version = "0.20", features = ["ssr"] }
+log = "0.4"
+env_logger = "0.10"
+
+[build-dependencies]
+static-files = "0.2"

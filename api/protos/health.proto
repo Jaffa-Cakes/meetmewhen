@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package health;
+
+service Health {
+  rpc IsOk (IsOkReq) returns (IsOkRes) {}
+}
+
+message IsOkReq {}
+
+message IsOkRes {
+    bool healthy = 1;
+}

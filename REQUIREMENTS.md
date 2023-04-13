@@ -14,6 +14,17 @@
   - Timezone selection
 - Existing Event Page
   - Same as when2meet
+- Accounts
+  - Save previous events you own
+  - Save previous events you have participated in
+  - Restrict access to events
+  - Delete previous events
+  - Notifications from event responses
+- Recommendation on times that are most suitable
+- Different types of availability
+  - Not Available
+  - Available
+  - Preferred
 
 ## Features of Existing Solutions
 

@@ -1,0 +1,2 @@
+cargo:rerun-if-changed=health.proto
+cargo:rerun-if-changed=../api/protos
