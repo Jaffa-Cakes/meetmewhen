@@ -26,10 +26,14 @@ async fn main() -> std::io::Result<()> {
         let generated = generate();
 
         App::new()
-        .service(index_prevention)
-        .service(actix_web_static_files::ResourceFiles::new("/", generated).do_not_resolve_defaults().skip_handler_when_not_found())
-        .service(catch_all)
-        .wrap(actix_web::middleware::Logger::default())
+            .service(index_prevention)
+            .service(
+                actix_web_static_files::ResourceFiles::new("/", generated)
+                    .do_not_resolve_defaults()
+                    .skip_handler_when_not_found(),
+            )
+            .service(catch_all)
+            .wrap(actix_web::middleware::Logger::default())
     })
     .bind(("127.0.0.1", 80))?
     .run()
@@ -43,7 +47,13 @@ async fn render() -> String {
 
     let generated = generate();
 
-    let index_html_s = std::str::from_utf8(generated.get("index.html").expect("index.html not found").data).expect("index.html could not be parsed");
+    let index_html_s = std::str::from_utf8(
+        generated
+            .get("index.html")
+            .expect("index.html not found")
+            .data,
+    )
+    .expect("index.html could not be parsed");
 
     let (index_html_before, index_html_after) = index_html_s.split_once("<body>").unwrap();
     let mut index_html_before = index_html_before.to_owned();
@@ -52,7 +62,7 @@ async fn render() -> String {
 
     let index_html_before = index_html_before.clone();
     let index_html_after = index_html_after.clone();
-    
+
     let mut html = String::new();
 
     html.push_str(&index_html_before);

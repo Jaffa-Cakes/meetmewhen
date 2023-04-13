@@ -1,3 +1,4 @@
 /target
 /csr/dist
 /csr/tailwind.css
+/csr/node_modules
