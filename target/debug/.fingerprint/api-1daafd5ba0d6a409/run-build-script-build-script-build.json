@@ -1,1 +1,0 @@
-{"rustc":9407668007973439367,"features":"","target":0,"profile":0,"path":0,"deps":[[13114503912737024977,"build_script_build",false,4126392565746493563]],"local":[{"RerunIfChanged":{"output":"debug\\build\\api-1daafd5ba0d6a409\\output","paths":["health.proto","../api/protos"]}}],"rustflags":[],"metadata":0,"config":0,"compile_kind":0}

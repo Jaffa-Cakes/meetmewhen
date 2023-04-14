@@ -1,17 +1,24 @@
 use actix_web::*;
+use std::collections::HashMap;
+use yew_router::Routable;
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
 /////////////////////////////
 
-#[get("/{tail:.*}")]
-async fn catch_all() -> impl Responder {
-    HttpResponse::Ok().body(render().await)
+async fn found(
+    request: HttpRequest,
+    queries: web::Query<HashMap<String, String>>,
+) -> impl Responder {
+    HttpResponse::Ok().body(render(request.uri().to_string(), queries.into_inner()).await)
 }
 
-#[get("/index.html")]
-async fn index_prevention() -> impl Responder {
-    HttpResponse::Ok().body(render().await)
+#[get("/{tail:.*}")]
+async fn not_found(
+    request: HttpRequest,
+    queries: web::Query<HashMap<String, String>>,
+) -> impl Responder {
+    HttpResponse::NotFound().body(render(request.uri().to_string(), queries.into_inner()).await)
 }
 
 //////////////////////////////
@@ -25,14 +32,42 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
         let generated = generate();
 
-        App::new()
-            .service(index_prevention)
+        let mut app = App::new()
+            .service(web::redirect("/index.html", "/"))
             .service(
                 actix_web_static_files::ResourceFiles::new("/", generated)
                     .do_not_resolve_defaults()
                     .skip_handler_when_not_found(),
-            )
-            .service(catch_all)
+            );
+
+        for route in client::Route::routes().into_iter() {
+            let split = route.trim_start_matches("/").split("/");
+
+            let mut parts: Vec<String> = Vec::new();
+
+            for part in split.into_iter() {
+                let new_part;
+
+                if part.starts_with(":") {
+                    new_part = format!("{{{}}}", part.trim_start_matches(":"));
+                } else {
+                    new_part = part.to_string();
+                }
+
+                parts.push(new_part.to_string());
+            }
+
+            let route = format!("/{}", parts.join("/"));
+
+            // We dont want to include the 404 route in the list of 200 routes
+            if route == "/404" {
+                continue;
+            }
+
+            app = app.route(&route, web::route().to(found));
+        }
+
+        app.service(not_found)
             .wrap(actix_web::middleware::Logger::default())
     })
     .bind(("127.0.0.1", 80))?
@@ -42,8 +77,12 @@ async fn main() -> std::io::Result<()> {
 
 //////////////////////////////
 
-async fn render() -> String {
-    let renderer = yew::ServerRenderer::<client::App>::new();
+async fn render(url: String, queries: HashMap<String, String>) -> String {
+    let renderer =
+        yew::ServerRenderer::<client::ServerApp>::with_props(move || client::ServerAppProps {
+            url: url.into(),
+            queries,
+        });
 
     let generated = generate();
 
