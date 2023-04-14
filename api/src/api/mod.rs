@@ -2,10 +2,10 @@ use tonic::{Request, Response, Status};
 
 pub use server::server;
 
-mod health;
+mod basic_event;
 
 mod server {
-    use super::health;
+    use super::basic_event;
 
     use std::time::Duration;
 
@@ -21,7 +21,7 @@ mod server {
         ["x-grpc-web", "content-type", "x-user-agent", "grpc-timeout"];
 
     pub async fn server() -> Result<(), Box<dyn std::error::Error>> {
-        let addr = "[::1]:50052".parse().unwrap();
+        let addr = "0.0.0.0:50052".parse().unwrap();
 
         Server::builder()
             .accept_http1(true)
@@ -46,7 +46,7 @@ mod server {
                     ),
             )
             .layer(GrpcWebLayer::new())
-            .add_service(health::Service::server())
+            .add_service(basic_event::Service::server())
             .serve(addr)
             .await?;
 

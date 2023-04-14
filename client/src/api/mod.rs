@@ -1,5 +1,5 @@
 use tonic_web_wasm_client::Client as WebClient;
 
-pub use health::Service as Health;
+pub use basic_event::Service as BasicEvent;
 
-mod health;
+mod basic_event;

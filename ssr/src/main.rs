@@ -93,7 +93,7 @@ async fn main() -> std::io::Result<()> {
         app.service(not_found)
             .wrap(actix_web::middleware::Logger::default())
     })
-    .bind(("127.0.0.1", 80))?
+    .bind(("0.0.0.0", 80))?
     .run()
     .await
 }

@@ -1,9 +1,9 @@
-pub mod health {
-    pub use hidden::health_server::Health as Trait;
-    pub use hidden::health_server::HealthServer as Server;
-    pub use hidden::{IsOkReq, IsOkRes};
+pub mod basic_event {
+    pub use hidden::basic_event_server::BasicEvent as Trait;
+    pub use hidden::basic_event_server::BasicEventServer as Server;
+    pub use hidden::{CreateReq, CreateRes, Type};
 
     mod hidden {
-        tonic::include_proto!("health");
+        tonic::include_proto!("basic_event");
     }
 }

@@ -7,11 +7,11 @@ pub use app::ServerAppProps;
 mod api;
 mod app;
 
-pub mod health {
-    pub use hidden::health_client::HealthClient as Client;
-    pub use hidden::{IsOkReq, IsOkRes};
+pub mod basic_event {
+    pub use hidden::basic_event_client::BasicEventClient as Client;
+    pub use hidden::{CreateReq, CreateRes, Type};
 
     mod hidden {
-        tonic::include_proto!("health");
+        tonic::include_proto!("basic_event");
     }
 }

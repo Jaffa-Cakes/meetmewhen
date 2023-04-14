@@ -5,6 +5,7 @@ use std::collections::HashMap;
 
 #[cfg(target_arch = "wasm32")]
 use wasm_bindgen_futures::spawn_local as wait;
+use web_sys::HtmlInputElement;
 use yew::prelude::*;
 use yew_router::history::{AnyHistory, History, MemoryHistory};
 use yew_router::prelude::*;
@@ -19,6 +20,14 @@ pub enum Route {
     #[not_found]
     #[at("/404")]
     NotFound,
+}
+
+#[derive(Clone)]
+struct CreateEventForm {
+    name: NodeRef,
+    r#type: NodeRef,
+    start: NodeRef,
+    end: NodeRef,
 }
 
 #[function_component]
@@ -63,9 +72,30 @@ fn switch(routes: Route) -> Html {
 
 #[function_component]
 pub fn Home() -> Html {
+    let form = CreateEventForm {
+        name: use_node_ref(),
+        r#type: use_node_ref(),
+        start: use_node_ref(),
+        end: use_node_ref(),
+    };
+
+    let onsubmit = {
+        let form = form.clone();
+
+        Callback::from(move |event: SubmitEvent| {
+            event.prevent_default();
+
+            let input = form.name.cast::<HtmlInputElement>();
+
+            if let Some(input) = input {
+                panic!("Name: {:?}", input.value());
+            }
+        })
+    };
+
     html! {
         <div class="min-h-screen min-w-screen bg-zinc-900 text-zinc-100 flex flex-col justify-center">
-            <div class="flex justify-around">
+            <form class="flex justify-around" onsubmit={onsubmit}>
                 <div class="bg-zinc-800 p-5 pt-4 rounded-2xl">
                     <span class="text-xl mr-5">{ "Type:" }</span>
                     <select class="rounded bg-zinc-900 text-zinc-100 p-2 pt-1 cursor-pointer">
@@ -76,7 +106,7 @@ pub fn Home() -> Html {
                 </div>
 
                 <div class="flex flex-col justify-center">
-                    <label>{ "Event Name: " }<atoms::InputText /></label>
+                    <label>{ "Event Name: " }<atoms::InputText r#ref={form.name}/></label>
 
                     <atoms::Button r#type={atoms::ButtonType::Submit}>{ "Create Event" }</atoms::Button>
 
@@ -100,7 +130,7 @@ pub fn Home() -> Html {
                         <option>{ "6:00 PM" }</option>
                     </select>
                 </div>
-            </div>
+            </form>
         </div>
     }
 }
