@@ -1,8 +1,12 @@
+use actix_web::http::header::{HeaderValue, CACHE_CONTROL, CONTENT_TYPE};
 use actix_web::*;
+use actix_web::{dev::Service as _, web, App};
 use std::collections::HashMap;
 use yew_router::Routable;
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
+
+static DO_CACHE: &'static [&str] = &["application/wasm", "application/javascript", "text/css"];
 
 /////////////////////////////
 
@@ -33,6 +37,25 @@ async fn main() -> std::io::Result<()> {
         let generated = generate();
 
         let mut app = App::new()
+            .wrap(middleware::Compress::default())
+            // Middleware that caches static files
+            .wrap_fn(|req, srv| {
+                let fut = srv.call(req);
+                async {
+                    let mut res = fut.await?;
+                    if let Some(content_type) = res.headers().get(CONTENT_TYPE) {
+                        if let Ok(content_type) = content_type.to_str() {
+                            if DO_CACHE.contains(&content_type) {
+                                res.headers_mut().insert(
+                                    CACHE_CONTROL,
+                                    HeaderValue::from_static("public, max-age=31536000"),
+                                );
+                            }
+                        }
+                    }
+                    Ok(res)
+                }
+            })
             .service(web::redirect("/index.html", "/"))
             .service(
                 actix_web_static_files::ResourceFiles::new("/", generated)

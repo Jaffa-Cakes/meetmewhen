@@ -76,7 +76,7 @@ pub fn Home() -> Html {
                 </div>
 
                 <div class="flex flex-col justify-center">
-                    <atoms::InputText />
+                    <label>{ "Event Name: " }<atoms::InputText /></label>
 
                     <atoms::Button r#type={atoms::ButtonType::Submit}>{ "Create Event" }</atoms::Button>
 
