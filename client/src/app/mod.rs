@@ -5,8 +5,11 @@ use super::api;
 use wasm_bindgen_futures::spawn_local as wait;
 use yew::prelude::*;
 
-#[function_component(App)]
-pub fn app() -> Html {
+mod atoms;
+mod components;
+
+#[function_component]
+pub fn App() -> Html {
     html! {
         <div class="min-h-screen min-w-screen bg-zinc-900 text-zinc-100 flex flex-col justify-center">
             <div class="flex justify-around">
@@ -17,42 +20,13 @@ pub fn app() -> Html {
                         <option>{ "Days" }</option>
                     </select>
 
-                    <div class="flex gap-2 mt-4">
-                        <div>
-                            <span class="block text-center">{ "M" }</span>
-                            <div class="w-6 border bg-zinc-300 h-36 cursor-pointer hover:bg-zinc-500" />
-                        </div>
-                        <div>
-                            <span class="block text-center">{ "T" }</span>
-                            <div class="w-6 border bg-zinc-300 h-36 cursor-pointer hover:bg-zinc-500" />
-                        </div>
-                        <div>
-                            <span class="block text-center">{ "W" }</span>
-                            <div class="w-6 border bg-zinc-300 h-36 cursor-pointer hover:bg-zinc-500" />
-                        </div>
-                        <div>
-                            <span class="block text-center">{ "T" }</span>
-                            <div class="w-6 border bg-zinc-300 h-36 cursor-pointer hover:bg-zinc-500" />
-                        </div>
-                        <div>
-                            <span class="block text-center">{ "F" }</span>
-                            <div class="w-6 border bg-zinc-300 h-36 cursor-pointer hover:bg-zinc-500" />
-                        </div>
-                        <div>
-                            <span class="block text-center">{ "S" }</span>
-                            <div class="w-6 border bg-zinc-300 h-36 cursor-pointer hover:bg-zinc-500" />
-                        </div>
-                        <div>
-                            <span class="block text-center">{ "S" }</span>
-                            <div class="w-6 border bg-zinc-300 h-36 cursor-pointer hover:bg-zinc-500" />
-                        </div>
-                    </div>
+                    <components::Week />
                 </div>
 
                 <div class="flex flex-col justify-center">
-                    <input class="bg-zinc-800 rounded text-zinc-100 text-center" type="text" placeholder="Event Name"/>
+                    <atoms::InputText />
 
-                    <button class="bg-zinc-800 rounded text-zinc-100 p-2 pt-1 mt-4 cursor-pointer hover:bg-zinc-700" type="submit">{ "Create Event" }</button>
+                    <atoms::Button r#type={atoms::ButtonType::Submit}>{ "Create Event" }</atoms::Button>
                 </div>
 
                 <div class="bg-zinc-800 p-5 pt-4 rounded-2xl">
