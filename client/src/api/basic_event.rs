@@ -17,12 +17,14 @@ impl Service {
         Client::new(wasm_client)
     }
 
-    pub async fn create(req: api_types::basic_event::create::Req) -> bool {
+    pub async fn create(
+        req: api_types::basic_event::create::Req,
+    ) -> Result<api_types::basic_event::create::Res, ()> {
         let mut client = Service::client();
 
         if !req.is_valid() {
             log::info!("Data is invalid.");
-            return false;
+            todo!("Handle error");
         }
 
         match client
@@ -31,8 +33,13 @@ impl Service {
             })
             .await
         {
-            Ok(_response) => true,
-            Err(_) => false,
+            Ok(res) => {
+                match api_types::basic_event::create::Res::from_bincode(&res.into_inner().value) {
+                    Ok(res) => Ok(res),
+                    Err(_) => todo!("Handle error"),
+                }
+            }
+            Err(_) => todo!("Handle error"),
         }
     }
 }

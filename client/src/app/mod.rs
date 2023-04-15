@@ -33,6 +33,8 @@ pub enum Route {
     #[not_found]
     #[at("/not-found")]
     NotFound,
+    #[at("/:id")]
+    Event { id: String },
 }
 
 ////////////////////////
@@ -72,11 +74,8 @@ pub fn ServerApp(props: &ServerAppProps) -> Html {
 
 fn switch(routes: Route) -> Html {
     match routes {
-        Route::Index => {
-            html! { <pages::Index /> }
-        }
-        Route::NotFound => {
-            html! { <pages::NotFound /> }
-        }
+        Route::Index => html! { <pages::Index /> },
+        Route::NotFound => html! { <pages::NotFound /> },
+        Route::Event { id } => html! { <pages::Event id={id} /> },
     }
 }

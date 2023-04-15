@@ -11,6 +11,8 @@ struct CreateEventForm {
 
 #[function_component]
 pub fn Index() -> Html {
+    let navigator = use_navigator().unwrap();
+
     let form = CreateEventForm {
         name: use_node_ref(),
         r#type: use_node_ref(),
@@ -20,10 +22,12 @@ pub fn Index() -> Html {
     };
 
     let onsubmit = {
+        let navigator = navigator.clone();
         let form = form.clone();
 
         Callback::from(move |event: SubmitEvent| {
             event.prevent_default();
+            let navigator = navigator.clone();
             let form = form.clone();
 
             wait(async move {
@@ -83,7 +87,12 @@ pub fn Index() -> Html {
                     todo!("Handle invalid request");
                 }
 
-                crate::api::BasicEvent::create(req).await;
+                match crate::api::BasicEvent::create(req).await {
+                    Ok(res) => {
+                        navigator.push(&Route::Event { id: res.id });
+                    }
+                    Err(_) => todo!("Handle error"),
+                }
             });
         })
     };
