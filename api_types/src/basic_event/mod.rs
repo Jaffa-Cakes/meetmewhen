@@ -1,10 +1,11 @@
 use super::*;
 
 pub mod create;
+pub mod get;
 
 pub type Name = String;
 
-#[derive(Deserialize, Serialize, PartialEq, Debug)]
+#[derive(Deserialize, Serialize, PartialEq, Debug, Clone)]
 pub enum Day {
     Monday,
     Tuesday,
@@ -15,7 +16,7 @@ pub enum Day {
     Sunday,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub enum When {
     Date(Vec<time::Date>),
     Day(Vec<Day>),

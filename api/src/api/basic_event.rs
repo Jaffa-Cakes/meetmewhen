@@ -29,32 +29,6 @@ impl Trait for Service {
             Err(_) => todo!("Error handling for invalid bincode"),
         };
 
-        // let time_format = time::macros::format_description!("[hour]:[minute]:[second]");
-
-        // let no_ealier_constructed =
-        //     match time::Time::parse(&format!("{:0width$}:00:00", r.no_earlier, width = 2), time_format) {
-        //         Ok(time) => time,
-        //         Err(_) => {
-        //             println!("{}", format!("{:0width$}:00:00", r.no_earlier, width = 2));
-        //             todo!("Error handling for invalid time")
-        //         },
-        //     };
-        // let no_later_constructed =
-        //     match time::Time::parse(&format!("{:0width$}:00:00", r.no_later, width = 2), time_format) {
-        //         Ok(time) => time,
-        //         Err(_) => todo!("Error handling for invalid time"),
-        //     };
-
-        // if r.when.len() == 0 {
-        //     todo!("Error handling for invalid when")
-        // }
-
-        // if r.name.len() == 0 {
-        //     todo!("Error handling for invalid name")
-        // }
-
-        // let when_constructed = r.when.join("|");
-
         let id_constructed: String = thread_rng()
             .sample_iter(&Alphanumeric)
             .take(8)
@@ -95,5 +69,67 @@ impl Trait for Service {
         Ok(Response::new(Bytes {
             value: api_types::basic_event::create::Res { id: id_constructed }.to_bincode(),
         }))
+    }
+
+    async fn get(&self, req: Request<Bytes>) -> Result<Response<Bytes>, Status> {
+        let Bytes { value: req } = req.into_inner();
+
+        let req = match api_types::basic_event::get::Req::from_bincode(&req) {
+            Ok(req) => req,
+            Err(_) => todo!("Error handling for invalid bincode"),
+        };
+
+        let mut conn = self.db.get_conn();
+
+        {
+            match conn.transaction(|conn| {
+                use schema::basic_event::dsl::*;
+
+                basic_event.filter(id.eq(req.id)).first::<(
+                    String,
+                    String,
+                    Vec<u8>,
+                    time::Time,
+                    time::Time,
+                    String,
+                    time::OffsetDateTime,
+                )>(conn)
+            }) {
+                Ok((id, name, when, no_earlier, no_later, timezone, created)) => {
+                    let when = match api_types::basic_event::When::from_bincode(&when) {
+                        Ok(when) => when,
+                        Err(_) => todo!("Error handling for invalid bincode"),
+                    };
+                    let timezone = {
+                        let hours = match timezone.split(':').next() {
+                            Some(hours) => match hours.parse::<i8>() {
+                                Ok(hours) => hours,
+                                Err(_) => todo!("Error handling for invalid timezone"),
+                            },
+                            None => todo!("Error handling for invalid timezone"),
+                        };
+
+                        match time::UtcOffset::from_hms(hours, 0, 0) {
+                            Ok(timezone) => timezone,
+                            Err(_) => todo!("Error handling for invalid bincode"),
+                        }
+                    };
+
+                    Ok(Response::new(Bytes {
+                        value: api_types::basic_event::get::Res {
+                            id,
+                            name,
+                            when,
+                            no_earlier,
+                            no_later,
+                            timezone,
+                            created,
+                        }
+                        .to_bincode(),
+                    }))
+                }
+                Err(_) => todo!("Error handling for not found"),
+            }
+        }
     }
 }

@@ -42,4 +42,25 @@ impl Service {
             Err(_) => todo!("Handle error"),
         }
     }
+
+    pub async fn get(
+        req: api_types::basic_event::get::Req,
+    ) -> Result<api_types::basic_event::get::Res, ()> {
+        let mut client = Service::client();
+
+        match client
+            .get(Bytes {
+                value: req.to_bincode(),
+            })
+            .await
+        {
+            Ok(res) => {
+                match api_types::basic_event::get::Res::from_bincode(&res.into_inner().value) {
+                    Ok(res) => Ok(res),
+                    Err(_) => todo!("Handle error"),
+                }
+            }
+            Err(err) => todo!("Handle error: {:#?}", err),
+        }
+    }
 }
