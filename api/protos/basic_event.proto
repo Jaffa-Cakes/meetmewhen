@@ -17,8 +17,9 @@ message CreateReq {
   repeated string when = 3;
   uint32 no_earlier = 4;
   uint32 no_later = 5;
+  string timezone = 6;
 }
 
 message CreateRes {
-  uint64 id = 1;
+  string id = 1;
 }

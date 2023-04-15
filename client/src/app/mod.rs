@@ -87,14 +87,14 @@ pub fn Home() -> Html {
 
             #[cfg(target_arch = "wasm32")]
             wait(async move {
-                crate::api::BasicEvent::create().await;
+                crate::api::BasicEvent::create("Event Name".to_string(), crate::api::basic_event::Type::Days, vec!["t1|t2|t3".to_string()], 1, 2, "Australia/Melbourne".to_string()).await;
             });
 
-            let input = form.name.cast::<HtmlInputElement>();
+            // let input = form.name.cast::<HtmlInputElement>();
 
-            if let Some(input) = input {
-                panic!("Name: {:?}", input.value());
-            }
+            // if let Some(input) = input {
+            //     panic!("Name: {:?}", input.value());
+            // }
         })
     };
 

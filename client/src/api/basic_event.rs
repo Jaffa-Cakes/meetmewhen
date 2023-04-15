@@ -2,6 +2,11 @@ use super::*;
 
 use crate::basic_event::*;
 
+pub enum Type {
+    Dates = 0,
+    Days = 1,
+}
+
 pub struct Service;
 
 impl Service {
@@ -12,15 +17,16 @@ impl Service {
         Client::new(wasm_client)
     }
 
-    pub async fn create() -> bool {
+    pub async fn create(name: String, r#type: Type, when: Vec<String>, no_earlier: u32, no_later: u32, timezone: String) -> bool {
         let mut client = Service::client();
 
         match client.create(CreateReq {
-            name: "Test".to_string(),
-            r#type: 0,
-            when: vec![],
-            no_earlier: 1,
-            no_later: 2
+            name,
+            r#type: r#type as i32,
+            when,
+            no_earlier,
+            no_later,
+            timezone
         }).await {
             Ok(_response) => true,
             Err(_) => false,

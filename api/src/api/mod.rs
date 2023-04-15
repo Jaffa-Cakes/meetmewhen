@@ -1,7 +1,7 @@
-use tonic::{Request, Response, Status};
-use crate::Database;
 use crate::schema;
+use crate::Database;
 use diesel::prelude::*;
+use tonic::{Request, Response, Status};
 
 pub use server::server;
 

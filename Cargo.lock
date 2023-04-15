@@ -270,6 +270,7 @@ dependencies = [
  "http",
  "num_cpus",
  "prost",
+ "rand",
  "time",
  "tokio",
  "tonic 0.9.1",
