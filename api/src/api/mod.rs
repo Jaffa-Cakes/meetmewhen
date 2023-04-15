@@ -1,10 +1,15 @@
 use tonic::{Request, Response, Status};
+use crate::Database;
+use crate::schema;
+use diesel::prelude::*;
 
 pub use server::server;
 
 mod basic_event;
 
 mod server {
+    use crate::database::Database;
+
     use super::basic_event;
 
     use std::time::Duration;
@@ -20,7 +25,7 @@ mod server {
     const DEFAULT_ALLOW_HEADERS: [&str; 4] =
         ["x-grpc-web", "content-type", "x-user-agent", "grpc-timeout"];
 
-    pub async fn server() -> Result<(), Box<dyn std::error::Error>> {
+    pub async fn server(db: Database) -> Result<(), Box<dyn std::error::Error>> {
         let addr = "0.0.0.0:50052".parse().unwrap();
 
         Server::builder()
@@ -46,7 +51,7 @@ mod server {
                     ),
             )
             .layer(GrpcWebLayer::new())
-            .add_service(basic_event::Service::server())
+            .add_service(basic_event::Service::server(db.clone()))
             .serve(addr)
             .await?;
 

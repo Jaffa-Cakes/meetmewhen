@@ -1,8 +1,14 @@
+use database::*;
+
 mod api;
+mod database;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    api::server().await?;
+    
+    let db = Database::new();
+
+    api::server(db).await?;
 
     Ok(())
 }

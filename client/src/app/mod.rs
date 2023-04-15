@@ -85,6 +85,11 @@ pub fn Home() -> Html {
         Callback::from(move |event: SubmitEvent| {
             event.prevent_default();
 
+            #[cfg(target_arch = "wasm32")]
+            wait(async move {
+                crate::api::BasicEvent::create().await;
+            });
+
             let input = form.name.cast::<HtmlInputElement>();
 
             if let Some(input) = input {
