@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-client = { path = "../client" }
+client = { path = "../client", features = ["ssr"]}
 
 actix-web = "4"
 actix-web-static-files = "4"

@@ -36,6 +36,7 @@ pub fn Event(props: &Props) -> Html {
                         Err(_) => todo!("Handle event not existing"),
                     },
                 );
+                println!("Request Received");
             });
         })
     };

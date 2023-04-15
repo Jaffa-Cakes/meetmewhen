@@ -26,9 +26,10 @@ mod server {
         ["x-grpc-web", "content-type", "x-user-agent", "grpc-timeout"];
 
     pub async fn server(db: Database) -> Result<(), Box<dyn std::error::Error>> {
-        let addr = "0.0.0.0:50052".parse().unwrap();
+        let addr_grpc_web = "0.0.0.0:50052".parse().unwrap();
+        let addr_grpc = "0.0.0.0:50053".parse().unwrap();
 
-        Server::builder()
+        let grpc_web = Server::builder()
             .accept_http1(true)
             .layer(
                 CorsLayer::new()
@@ -52,8 +53,13 @@ mod server {
             )
             .layer(GrpcWebLayer::new())
             .add_service(basic_event::Service::server(db.clone()))
-            .serve(addr)
-            .await?;
+            .serve(addr_grpc_web);
+
+        let grpc = Server::builder()
+            .add_service(basic_event::Service::server(db.clone()))
+            .serve(addr_grpc);
+
+        tokio::try_join!(grpc_web, grpc)?;
 
         Ok(())
     }
