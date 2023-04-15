@@ -12,13 +12,13 @@ pub enum Day {
     Thursday,
     Friday,
     Saturday,
-    Sunday
+    Sunday,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
 pub enum When {
     Date(Vec<time::Date>),
-    Day(Vec<Day>)
+    Day(Vec<Day>),
 }
 
 impl Bincoded for When {}
@@ -41,7 +41,7 @@ impl Validate for When {
                         return false;
                     }
                 }
-            },
+            }
             When::Day(days) => {
                 if days.is_empty() {
                     return false;
@@ -69,12 +69,12 @@ impl Validate for Name {
         if self.len() < 3 || self.len() > 32 {
             return false;
         }
-    
+
         // Require only alphanumeric characters and spaces
         if !self.chars().all(|c| c.is_alphanumeric() || c == ' ') {
             return false;
         }
-    
+
         true
     }
 }

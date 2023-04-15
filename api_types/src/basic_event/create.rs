@@ -6,7 +6,7 @@ pub struct Req {
     pub when: When,
     pub no_earlier: time::Time,
     pub no_later: time::Time,
-    pub timezone: time::UtcOffset
+    pub timezone: time::UtcOffset,
 }
 
 impl Bincoded for Req {}
@@ -31,7 +31,7 @@ impl Validate for Req {
 
 #[derive(Deserialize, Serialize)]
 pub struct Res {
-    pub id: String
+    pub id: String,
 }
 
 impl Bincoded for Res {}

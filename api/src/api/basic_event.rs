@@ -62,7 +62,13 @@ impl Trait for Service {
             .collect();
 
         let tz = req.timezone.as_hms();
-        let tz = format!("{:0width$}:{:0width$}:{:0width$}", tz.0, tz.1, tz.2, width = 2);
+        let tz = format!(
+            "{:0width$}:{:0width$}:{:0width$}",
+            tz.0,
+            tz.1,
+            tz.2,
+            width = 2
+        );
 
         let mut conn = self.db.get_conn();
 
@@ -86,6 +92,8 @@ impl Trait for Service {
             }
         }
 
-        Ok(Response::new(Bytes { value: api_types::basic_event::create::Res { id: id_constructed }.to_bincode() }))
+        Ok(Response::new(Bytes {
+            value: api_types::basic_event::create::Res { id: id_constructed }.to_bincode(),
+        }))
     }
 }

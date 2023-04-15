@@ -25,7 +25,12 @@ impl Service {
             return false;
         }
 
-        match client.create(Bytes { value: req.to_bincode()}).await {
+        match client
+            .create(Bytes {
+                value: req.to_bincode(),
+            })
+            .await
+        {
             Ok(_response) => true,
             Err(_) => false,
         }
