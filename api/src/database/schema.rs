@@ -4,7 +4,7 @@ diesel::table! {
     basic_event (id) {
         id -> Text,
         name -> Text,
-        when -> Text,
+        when -> Bytea,
         no_ealier -> Time,
         no_later -> Time,
         timezone -> Text,

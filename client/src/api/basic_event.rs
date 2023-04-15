@@ -17,17 +17,15 @@ impl Service {
         Client::new(wasm_client)
     }
 
-    pub async fn create(name: String, r#type: Type, when: Vec<String>, no_earlier: u32, no_later: u32, timezone: String) -> bool {
+    pub async fn create(req: api_types::basic_event::create::Req) -> bool {
         let mut client = Service::client();
 
-        match client.create(CreateReq {
-            name,
-            r#type: r#type as i32,
-            when,
-            no_earlier,
-            no_later,
-            timezone
-        }).await {
+        if !req.is_valid() {
+            log::info!("Data is invalid.");
+            return false;
+        }
+
+        match client.create(Bytes { value: req.to_bincode()}).await {
             Ok(_response) => true,
             Err(_) => false,
         }

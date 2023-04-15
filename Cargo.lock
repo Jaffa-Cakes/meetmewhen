@@ -264,6 +264,7 @@ checksum = "d301b3b94cb4b2f23d7917810addbbaff90738e0ca2be692bd027e70d7e0330c"
 name = "api"
 version = "0.1.0"
 dependencies = [
+ "api_types",
  "diesel",
  "diesel_migrations",
  "dotenvy",
@@ -277,6 +278,15 @@ dependencies = [
  "tonic-build 0.9.1",
  "tonic-web",
  "tower-http 0.3.5",
+]
+
+[[package]]
+name = "api_types"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "serde",
+ "time",
 ]
 
 [[package]]
@@ -488,7 +498,10 @@ dependencies = [
 name = "client"
 version = "0.1.0"
 dependencies = [
+ "api_types",
+ "log",
  "prost",
+ "time",
  "tonic 0.8.3",
  "tonic-build 0.8.4",
  "tonic-web-wasm-client",

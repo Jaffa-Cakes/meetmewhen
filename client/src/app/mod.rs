@@ -87,7 +87,13 @@ pub fn Home() -> Html {
 
             #[cfg(target_arch = "wasm32")]
             wait(async move {
-                crate::api::BasicEvent::create("Event Name".to_string(), crate::api::basic_event::Type::Days, vec!["t1|t2|t3".to_string()], 1, 2, "Australia/Melbourne".to_string()).await;
+                crate::api::BasicEvent::create(api_types::basic_event::create::Req {
+                    name: "Test".to_string(),
+                    when: api_types::basic_event::When::Day(vec![api_types::basic_event::Day::Monday, api_types::basic_event::Day::Tuesday]),
+                    no_earlier: time::Time::from_hms(1, 0, 0).unwrap(),
+                    no_later: time::Time::from_hms(6, 0, 0).unwrap(),
+                    timezone: time::UtcOffset::UTC
+                }).await;
             });
 
             // let input = form.name.cast::<HtmlInputElement>();

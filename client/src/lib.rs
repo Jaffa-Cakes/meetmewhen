@@ -9,7 +9,7 @@ mod app;
 
 pub mod basic_event {
     pub use hidden::basic_event_client::BasicEventClient as Client;
-    pub use hidden::{CreateReq, CreateRes, Type};
+    pub use hidden::Bytes;
 
     mod hidden {
         tonic::include_proto!("basic_event");

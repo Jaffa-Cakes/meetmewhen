@@ -3,23 +3,9 @@ syntax = "proto3";
 package basic_event;
 
 service BasicEvent {
-  rpc Create (CreateReq) returns (CreateRes) {}
+  rpc Create (Bytes) returns (Bytes) {}
 }
 
-enum Type {
-  DATES = 0;
-  DAYS = 1;
-}
-
-message CreateReq {
-  string name = 1;
-  Type type = 2;
-  repeated string when = 3;
-  uint32 no_earlier = 4;
-  uint32 no_later = 5;
-  string timezone = 6;
-}
-
-message CreateRes {
-  string id = 1;
+message Bytes {
+  bytes value = 1;
 }

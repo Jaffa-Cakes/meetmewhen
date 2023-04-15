@@ -1,0 +1,9 @@
+[package]
+name = "api_types"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = "1"
+bincode = "1"
+time = { version = "0.3", features = ["serde"] }
