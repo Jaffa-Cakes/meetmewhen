@@ -21,24 +21,11 @@ pub struct Service;
 impl Service {
     async fn client() -> ClientReturn {
         #[cfg(target_arch = "wasm32")]
-        {
-            println!("Wasm");
-            let wasm_client = WebClient::new("http://localhost:50052".to_string());
+        let out = Client::new(WebClient::new("http://localhost:50052".to_string()));
+        #[cfg(not(target_arch = "wasm32"))]
+        let out = Client::connect("http://localhost:50053".to_string()).await.unwrap();
 
-            Client::new(wasm_client)
-        }
-
-        println!("Running custom");
-        #[cfg(not(target_arch = "wasm32"))]
-        let swag = tonic::transport::Endpoint::new("http://localhost:50053").unwrap().connect_timeout(std::time::Duration::from_secs(2)).connect().await.unwrap();
-        println!("Finished custom");
-        // return Client::new(swag);
-        #[cfg(not(target_arch = "wasm32"))]
-        println!("Regular");
-        #[cfg(not(target_arch = "wasm32"))]
-        Client::connect("http://localhost:50053".to_string())
-            .await
-            .unwrap()
+        out
     }
 
     pub async fn create(
