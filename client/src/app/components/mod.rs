@@ -2,7 +2,7 @@ use super::*;
 
 pub use week::Week;
 
-pub use calendar::Calendar as Calendar;
+pub use calendar::Calendar;
 
-mod week;
 mod calendar;
+mod week;

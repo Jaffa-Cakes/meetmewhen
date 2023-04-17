@@ -9,7 +9,7 @@ pub struct WeekProps {
 #[function_component]
 pub fn Week(props: &WeekProps) -> Html {
     let WeekProps { selected, toggle } = props;
-    
+
     let selected = &*selected;
     let selected = selected.clone();
 
@@ -37,7 +37,11 @@ struct Props {
 
 #[function_component]
 fn Day(props: &Props) -> Html {
-    let Props { day, selected, toggle } = props;
+    let Props {
+        day,
+        selected,
+        toggle,
+    } = props;
 
     let selected = &*selected;
     let selected = selected.clone();
@@ -69,7 +73,7 @@ fn Day(props: &Props) -> Html {
                     <div class="w-6 border bg-blue-800 hover:bg-blue-950 h-36 cursor-pointer border-blue-800" {onclick} />
                 </div>
             }
-        },
+        }
         false => {
             html! {
                 <div>
@@ -77,6 +81,6 @@ fn Day(props: &Props) -> Html {
                     <div class="w-6 border bg-red-800 hover:bg-red-950 h-36 cursor-pointer border-blue-800" {onclick} />
                 </div>
             }
-        },
+        }
     }
 }

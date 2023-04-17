@@ -49,7 +49,7 @@ pub fn Calendar(props: &CalendarProps) -> Html {
                 for dates.chunks(7).map(|chunk| {
                     let selected = &*selected;
                     let selected = selected.clone();
-                    
+
                     html! {
                         <Row dates={chunk.to_vec()} {selected} {toggle} />
                     }
@@ -86,34 +86,36 @@ struct RowProps {
 
 #[function_component]
 fn Row(props: &RowProps) -> Html {
-    let RowProps { dates, selected, toggle } = props;
+    let RowProps {
+        dates,
+        selected,
+        toggle,
+    } = props;
 
     let month_note = match dates.first().unwrap().month() != dates.last().unwrap().month() {
         true => {
-
             let m1 = &format!("{}", dates.first().unwrap().month())[..3];
             let m2 = &format!("{}", dates.last().unwrap().month())[..3];
 
             format!("{}/{}", m1, m2)
-        },
+        }
         false => {
             let m = &format!("{}", dates.first().unwrap().month())[..3];
 
             m.to_string()
-        },
+        }
     };
 
     let year_note = match dates.first().unwrap().year() != dates.last().unwrap().year() {
         true => {
-
             let m1 = format!("{}", dates.first().unwrap().year());
             let m2 = &format!("{}", dates.last().unwrap().year())[2..];
 
             format!("{}/{}", m1, m2)
-        },
+        }
         false => {
             format!("{}", dates.first().unwrap().year())
-        },
+        }
     };
 
     html! {
@@ -145,7 +147,11 @@ struct DateProps {
 
 #[function_component]
 fn Date(props: &DateProps) -> Html {
-    let DateProps { date, selected, toggle } = props;
+    let DateProps {
+        date,
+        selected,
+        toggle,
+    } = props;
 
     let onclick = {
         let date = date.clone();
@@ -163,13 +169,13 @@ fn Date(props: &DateProps) -> Html {
                     <span class="text-md">{ format!("{}", date.day()) }</span>
                 </div>
             }
-        },
+        }
         false => {
             html! {
                 <div class="w-6 h-6 bg-red-800 hover:bg-red-950 grid place-content-center border border-blue-800 cursor-pointer" {onclick}>
                     <span class="text-md">{ format!("{}", date.day()) }</span>
                 </div>
             }
-        },
+        }
     }
 }

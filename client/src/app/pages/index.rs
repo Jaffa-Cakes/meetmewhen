@@ -157,11 +157,9 @@ pub fn Index() -> Html {
         let dates_selected = dates_selected.clone();
 
         Callback::from(move |date: time::Date| {
-
             match dates_selected.contains(&date) {
                 // We are removing the date
                 true => {
-
                     let inner = &*dates_selected;
                     let mut inner = inner.clone();
 
@@ -170,17 +168,16 @@ pub fn Index() -> Html {
                     inner.remove(index);
 
                     dates_selected.set(inner);
-                },
+                }
                 // We are adding the date
                 false => {
-
                     let inner = &*dates_selected;
                     let mut inner = inner.clone();
 
                     inner.push(date);
 
                     dates_selected.set(inner);
-                },
+                }
             }
         })
     };
@@ -189,11 +186,9 @@ pub fn Index() -> Html {
         let days_selected = days_selected.clone();
 
         Callback::from(move |day: time::Weekday| {
-
             match days_selected.contains(&day) {
                 // We are removing the day
                 true => {
-
                     let inner = &*days_selected;
                     let mut inner = inner.clone();
 
@@ -202,17 +197,16 @@ pub fn Index() -> Html {
                     inner.remove(index);
 
                     days_selected.set(inner);
-                },
+                }
                 // We are adding the day
                 false => {
-
                     let inner = &*days_selected;
                     let mut inner = inner.clone();
 
                     inner.push(day);
 
                     days_selected.set(inner);
-                },
+                }
             }
         })
     };
