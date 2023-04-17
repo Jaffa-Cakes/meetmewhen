@@ -53,7 +53,7 @@ pub fn Event(props: &Props) -> Html {
 }
 
 /////////////////////////
-///
+
 #[derive(PartialEq, Properties)]
 struct LoaderProps {
     status: Status,

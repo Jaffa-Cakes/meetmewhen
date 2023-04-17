@@ -1,5 +1,11 @@
 use super::*;
 
+#[derive(Clone, PartialEq)]
+enum Type {
+    Dates = 0,
+    Days = 1,
+}
+
 #[derive(Clone)]
 struct CreateEventForm {
     name: NodeRef,
@@ -11,6 +17,8 @@ struct CreateEventForm {
 
 #[function_component]
 pub fn Index() -> Html {
+    let dates_selected = use_state_eq(|| Vec::<time::Date>::new());
+
     let navigator = use_navigator().unwrap();
 
     let form = CreateEventForm {
@@ -24,11 +32,13 @@ pub fn Index() -> Html {
     let onsubmit = {
         let navigator = navigator.clone();
         let form = form.clone();
+        let dates_selected = dates_selected.clone();
 
         Callback::from(move |event: SubmitEvent| {
             event.prevent_default();
             let navigator = navigator.clone();
             let form = form.clone();
+            let dates_selected = dates_selected.clone();
 
             wait(async move {
                 let name = match form.name.cast::<HtmlInputElement>() {
@@ -39,6 +49,9 @@ pub fn Index() -> Html {
                 //     Some(input) => input.value(),
                 //     None => todo!("Handle when error"),
                 // };
+                let dates_selected = &*dates_selected;
+                let dates_selected = dates_selected.clone();
+                let when = api_types::basic_event::When::Date(dates_selected);
                 let no_earlier = match form.no_earlier.cast::<HtmlInputElement>() {
                     Some(input) => {
                         let input = match input.value().parse::<u8>() {
@@ -74,10 +87,7 @@ pub fn Index() -> Html {
 
                 let req = api_types::basic_event::create::Req {
                     name,
-                    when: api_types::basic_event::When::Day(vec![
-                        api_types::basic_event::Day::Monday,
-                        api_types::basic_event::Day::Tuesday,
-                    ]),
+                    when,
                     no_earlier,
                     no_later,
                     timezone: time::UtcOffset::UTC,
@@ -97,16 +107,51 @@ pub fn Index() -> Html {
         })
     };
 
+    let date_toggle = {
+        let dates_selected = dates_selected.clone();
+
+        Callback::from(move |date: time::Date| {
+
+            match dates_selected.contains(&date) {
+                // We are removing the date
+                true => {
+
+                    let inner = &*dates_selected;
+                    let mut inner = inner.clone();
+
+                    let index = inner.iter().position(|i| *i == date).unwrap();
+
+                    inner.remove(index);
+
+                    dates_selected.set(inner);
+                },
+                // We are adding the date
+                false => {
+
+                    let inner = &*dates_selected;
+                    let mut inner = inner.clone();
+
+                    inner.push(date);
+
+                    dates_selected.set(inner);
+                },
+            }
+        })
+    };
+
+    let dates_selected = &*dates_selected;
+    let dates_selected = dates_selected.clone();
+
     html! {
         <div class="min-h-screen min-w-screen bg-zinc-900 text-zinc-100 flex flex-col justify-center">
             <form class="flex justify-around" onsubmit={onsubmit}>
                 <div class="bg-zinc-800 p-5 pt-4 rounded-2xl">
                     <span class="text-xl mr-5">{ "Type:" }</span>
-                    <atoms::Select r#ref={form.r#type}>
-                        <option>{ "Dates" }</option>
-                        <option>{ "Days" }</option>
+                    <atoms::Select r#ref={form.r#type.clone()}>
+                        <option value="0">{ "Dates" }</option>
+                        <option value="1">{ "Days" }</option>
                     </atoms::Select>
-                    <components::Week />
+                    <WhenSelector r#type={form.r#type} selected={dates_selected} toggle={date_toggle} />
                 </div>
 
                 <div class="flex flex-col justify-center">
@@ -188,5 +233,52 @@ pub fn Index() -> Html {
                 </div>
             </form>
         </div>
+    }
+}
+
+///////////////////////////////////
+
+#[derive(PartialEq, Properties)]
+struct WhenSelectorProps {
+    r#type: NodeRef,
+    selected: Vec<time::Date>,
+    toggle: Callback<time::Date>,
+}
+
+#[function_component]
+fn WhenSelector(props: &WhenSelectorProps) -> Html {
+    let WhenSelectorProps { r#type, selected, toggle } = props;
+    // let WhenSelectorProps { r#type } = props;
+
+    // let r#type = match r#type.cast::<HtmlInputElement>() {
+    //     Some(input) => {
+    //         let input = match input.value().parse::<u8>() {
+    //             Ok(input) => input,
+    //             Err(_) => todo!("Handle no_earlier error"),
+    //         };
+
+    //         match input {
+    //             0 => Type::Dates,
+    //             1 => Type::Days,
+    //             _ => todo!("Handle when type error"),
+    //         }
+    //     }
+    //     None => todo!("Handle no_earlier error"),
+    // };
+
+    // match r#type {
+    //     Type::Dates => html! {
+    //         <components::Calendar />
+    //     },
+    //     Type::Days => html! {
+    //         <components::Week />
+    //     },
+    // }
+
+    let selected = &*selected;
+    let selected = selected.clone();
+
+    html! {
+        <components::Calendar {selected} {toggle} />
     }
 }
