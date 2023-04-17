@@ -17,7 +17,9 @@ struct CreateEventForm {
 
 #[function_component]
 pub fn Index() -> Html {
+    let when_selected = use_state_eq(|| Type::Days);
     let dates_selected = use_state_eq(|| Vec::<time::Date>::new());
+    let days_selected = use_state_eq(|| Vec::<time::Weekday>::new());
 
     let navigator = use_navigator().unwrap();
 
@@ -33,12 +35,16 @@ pub fn Index() -> Html {
         let navigator = navigator.clone();
         let form = form.clone();
         let dates_selected = dates_selected.clone();
+        let days_selected = days_selected.clone();
+        let when_selected = when_selected.clone();
 
         Callback::from(move |event: SubmitEvent| {
             event.prevent_default();
             let navigator = navigator.clone();
             let form = form.clone();
             let dates_selected = dates_selected.clone();
+            let days_selected = days_selected.clone();
+            let when_selected = when_selected.clone();
 
             wait(async move {
                 let name = match form.name.cast::<HtmlInputElement>() {
@@ -51,7 +57,16 @@ pub fn Index() -> Html {
                 // };
                 let dates_selected = &*dates_selected;
                 let dates_selected = dates_selected.clone();
-                let when = api_types::basic_event::When::Date(dates_selected);
+                let days_selected = &*days_selected;
+                let days_selected = days_selected.clone();
+                let when_selected = &*when_selected;
+                let when_selected = when_selected.clone();
+
+                let when = match when_selected {
+                    Type::Dates => api_types::basic_event::When::Date(dates_selected),
+                    Type::Days => api_types::basic_event::When::Day(days_selected),
+                };
+
                 let no_earlier = match form.no_earlier.cast::<HtmlInputElement>() {
                     Some(input) => {
                         let input = match input.value().parse::<u8>() {
@@ -107,6 +122,37 @@ pub fn Index() -> Html {
         })
     };
 
+    let when_set = {
+        let when_selected = when_selected.clone();
+        let form = form.clone();
+
+        Callback::from(move |e: web_sys::Event| {
+            // let dates_selected = form.r#type.cast::<HtmlInputElement>();
+            // let dates_selected = dates_selected.clone();
+
+            // use wasm_bindgen::JsCast;
+
+            // let target: Option<web_sys::EventTarget> = e.target();
+
+            // let input = target.and_then(|target| target.dyn_into::<HtmlInputElement>().ok());
+            let input = form.r#type.cast::<HtmlInputElement>();
+
+            // panic!("HERE: {:#?}", input.unwrap().value());
+
+            if let Some(input) = input {
+                let value = input.value();
+
+                let value = match value.as_str() {
+                    "0" => Type::Dates,
+                    "1" => Type::Days,
+                    _ => todo!("Handle when_set error"),
+                };
+
+                when_selected.set(value);
+            }
+        })
+    };
+
     let date_toggle = {
         let dates_selected = dates_selected.clone();
 
@@ -139,19 +185,57 @@ pub fn Index() -> Html {
         })
     };
 
+    let day_toggle = {
+        let days_selected = days_selected.clone();
+
+        Callback::from(move |day: time::Weekday| {
+
+            match days_selected.contains(&day) {
+                // We are removing the day
+                true => {
+
+                    let inner = &*days_selected;
+                    let mut inner = inner.clone();
+
+                    let index = inner.iter().position(|i| *i == day).unwrap();
+
+                    inner.remove(index);
+
+                    days_selected.set(inner);
+                },
+                // We are adding the day
+                false => {
+
+                    let inner = &*days_selected;
+                    let mut inner = inner.clone();
+
+                    inner.push(day);
+
+                    days_selected.set(inner);
+                },
+            }
+        })
+    };
+
     let dates_selected = &*dates_selected;
     let dates_selected = dates_selected.clone();
+
+    let days_selected = &*days_selected;
+    let days_selected = days_selected.clone();
+
+    let when_selected = &*when_selected;
+    let when_selected = when_selected.clone();
 
     html! {
         <div class="min-h-screen min-w-screen bg-zinc-900 text-zinc-100 flex flex-col justify-center">
             <form class="flex justify-around" onsubmit={onsubmit}>
                 <div class="bg-zinc-800 p-5 pt-4 rounded-2xl">
                     <span class="text-xl mr-5">{ "Type:" }</span>
-                    <atoms::Select r#ref={form.r#type.clone()}>
+                    <atoms::Select r#ref={form.r#type} onchange={when_set}>
                         <option value="0">{ "Dates" }</option>
                         <option value="1">{ "Days" }</option>
                     </atoms::Select>
-                    <WhenSelector r#type={form.r#type} selected={dates_selected} toggle={date_toggle} />
+                    <WhenSelector selected={when_selected} {dates_selected} {date_toggle} {days_selected} {day_toggle} />
                 </div>
 
                 <div class="flex flex-col justify-center">
@@ -240,45 +324,35 @@ pub fn Index() -> Html {
 
 #[derive(PartialEq, Properties)]
 struct WhenSelectorProps {
-    r#type: NodeRef,
-    selected: Vec<time::Date>,
-    toggle: Callback<time::Date>,
+    selected: Type,
+    dates_selected: Vec<time::Date>,
+    date_toggle: Callback<time::Date>,
+    days_selected: Vec<time::Weekday>,
+    day_toggle: Callback<time::Weekday>,
 }
 
 #[function_component]
 fn WhenSelector(props: &WhenSelectorProps) -> Html {
-    let WhenSelectorProps { r#type, selected, toggle } = props;
-    // let WhenSelectorProps { r#type } = props;
+    let WhenSelectorProps {
+        selected,
+        dates_selected,
+        date_toggle,
+        days_selected,
+        day_toggle,
+    } = props;
 
-    // let r#type = match r#type.cast::<HtmlInputElement>() {
-    //     Some(input) => {
-    //         let input = match input.value().parse::<u8>() {
-    //             Ok(input) => input,
-    //             Err(_) => todo!("Handle no_earlier error"),
-    //         };
+    let dates_selected = &*dates_selected;
+    let dates_selected = dates_selected.clone();
 
-    //         match input {
-    //             0 => Type::Dates,
-    //             1 => Type::Days,
-    //             _ => todo!("Handle when type error"),
-    //         }
-    //     }
-    //     None => todo!("Handle no_earlier error"),
-    // };
+    let days_selected = &*days_selected;
+    let days_selected = days_selected.clone();
 
-    // match r#type {
-    //     Type::Dates => html! {
-    //         <components::Calendar />
-    //     },
-    //     Type::Days => html! {
-    //         <components::Week />
-    //     },
-    // }
-
-    let selected = &*selected;
-    let selected = selected.clone();
-
-    html! {
-        <components::Calendar {selected} {toggle} />
+    match selected {
+        Type::Dates => html! {
+            <components::Calendar selected={dates_selected} toggle={date_toggle} />
+        },
+        Type::Days => html! {
+            <components::Week selected={days_selected} toggle={day_toggle} />
+        },
     }
 }

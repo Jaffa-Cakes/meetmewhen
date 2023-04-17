@@ -5,21 +5,10 @@ pub mod get;
 
 pub type Name = String;
 
-#[derive(Deserialize, Serialize, PartialEq, Debug, Clone)]
-pub enum Day {
-    Monday,
-    Tuesday,
-    Wednesday,
-    Thursday,
-    Friday,
-    Saturday,
-    Sunday,
-}
-
 #[derive(Deserialize, Serialize, Debug, PartialEq, Clone)]
 pub enum When {
     Date(Vec<time::Date>),
-    Day(Vec<Day>),
+    Day(Vec<time::Weekday>),
 }
 
 impl Bincoded for When {}
