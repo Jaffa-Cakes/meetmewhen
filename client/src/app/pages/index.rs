@@ -1,10 +1,16 @@
 use super::*;
 
+////////////////////////
+/// Mode Selector
+
 #[derive(Clone, PartialEq)]
 enum Type {
     Dates = 0,
     Days = 1,
 }
+
+////////////////////////
+/// Form Input References
 
 #[derive(Clone)]
 struct CreateEventForm {
@@ -14,6 +20,9 @@ struct CreateEventForm {
     no_later: NodeRef,
     timezone: NodeRef,
 }
+
+////////////////////////
+/// Index Page
 
 #[function_component]
 pub fn Index() -> Html {
@@ -112,7 +121,7 @@ pub fn Index() -> Html {
 
                 match crate::api::BasicEvent::create(req).await {
                     Ok(res) => {
-                        navigator.push(&Route::Event { id: res.id });
+                        navigator.push(&Routes::Event { id: res.id });
                     }
                     Err(_) => todo!("Handle error"),
                 }
@@ -225,9 +234,9 @@ pub fn Index() -> Html {
 
                     <atoms::Button r#type={atoms::ButtonType::Submit}>{ "Create Event" }</atoms::Button>
 
-                    <Link<Route> to={Route::NotFound}>
+                    <Link<Routes> to={Routes::NotFound}>
                         { "Not Found Page" }
-                    </Link<Route>>
+                    </Link<Routes>>
                 </div>
 
                 <div class="bg-zinc-800 p-5 pt-4 rounded-2xl">
@@ -302,7 +311,9 @@ pub fn Index() -> Html {
     }
 }
 
-///////////////////////////////////
+////////////////////////
+/// Mode Selector
+// Displays the desired mode of input
 
 #[derive(PartialEq, Properties)]
 struct WhenSelectorProps {

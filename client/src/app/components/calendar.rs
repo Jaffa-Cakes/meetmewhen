@@ -2,7 +2,9 @@ use super::*;
 
 static NUM_OF_ROWS: i64 = 7;
 
-///////////////////////////////////////////
+////////////////////////
+/// Calendar Component
+// Input for multiple dates to be selected
 
 #[derive(PartialEq, Properties)]
 pub struct CalendarProps {
@@ -59,7 +61,8 @@ pub fn Calendar(props: &CalendarProps) -> Html {
     }
 }
 
-///////////////////////////////////////////
+////////////////////////
+/// Column Headings
 
 #[derive(PartialEq, Properties)]
 struct HeadingProps {
@@ -75,7 +78,9 @@ fn Heading(props: &HeadingProps) -> Html {
     }
 }
 
-///////////////////////////////////////////
+////////////////////////
+/// Row of Dates
+// Lists a week of dates alongside their month and year
 
 #[derive(PartialEq, Properties)]
 struct RowProps {
@@ -136,7 +141,8 @@ fn Row(props: &RowProps) -> Html {
     }
 }
 
-///////////////////////////////////////////
+////////////////////////
+/// Selectable Date Box
 
 #[derive(PartialEq, Properties)]
 struct DateProps {

@@ -1,6 +1,7 @@
-use crate::api;
-
 use super::*;
+
+////////////////////////
+/// API Response Status
 
 #[derive(PartialEq, Clone)]
 enum Status {
@@ -8,7 +9,9 @@ enum Status {
     Received(api_types::basic_event::get::Res),
 }
 
-/////////////////////////
+////////////////////////
+/// Event Page
+// Displays the details of an existing event and allows the user to enter their availabilities
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -56,7 +59,9 @@ pub fn Event(props: &Props) -> Html {
     }
 }
 
-/////////////////////////
+////////////////////////
+/// Loader
+// Waits for the API response and then displays the page
 
 #[derive(PartialEq, Properties)]
 struct LoaderProps {
@@ -88,7 +93,8 @@ fn Loader(props: &LoaderProps) -> Html {
     }
 }
 
-/////////////////////////
+////////////////////////
+/// Page Content
 
 #[derive(PartialEq, Properties)]
 struct PageProps {

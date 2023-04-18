@@ -1,5 +1,8 @@
 use super::*;
 
+////////////////////////
+/// Not Found Page
+
 #[function_component]
 pub fn NotFound() -> Html {
     html! {

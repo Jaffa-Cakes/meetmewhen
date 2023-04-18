@@ -1,10 +1,16 @@
 use super::*;
 
+////////////////////////
+/// Simplified Time Representation
+
 #[derive(PartialEq, Clone)]
 enum BasicWhen {
     Date(time::Date),
     Day(time::Weekday),
 }
+
+////////////////////////
+/// Time Selector Component
 
 #[derive(PartialEq, Properties)]
 pub struct TimeSelectorProps {
@@ -99,7 +105,9 @@ pub fn TimeSelector(props: &TimeSelectorProps) -> Html {
     }
 }
 
-/////////////////////////
+////////////////////////
+/// Time Slot
+// The individual time slots for each individual day/date
 
 #[derive(PartialEq, Properties)]
 struct SlotProps {

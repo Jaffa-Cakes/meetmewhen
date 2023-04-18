@@ -1,7 +1,4 @@
-pub use app::App;
-pub use app::Route;
-pub use app::ServerApp;
-pub use app::ServerAppProps;
+pub use app::root::{App, Routes, ServerApp, ServerAppProps};
 
 mod api;
 mod app;

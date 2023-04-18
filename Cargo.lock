@@ -501,6 +501,7 @@ dependencies = [
  "api_types",
  "futures",
  "log",
+ "prokio",
  "prost",
  "time",
  "tonic 0.8.3",

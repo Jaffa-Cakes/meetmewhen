@@ -1,31 +1,18 @@
 use actix_web::http::header::{HeaderValue, CACHE_CONTROL, CONTENT_TYPE};
 use actix_web::*;
 use actix_web::{dev::Service as _, web, App};
+use renderer::render;
 use std::collections::HashMap;
 use yew_router::Routable;
+
+mod endpoints;
+mod renderer;
 
 include!(concat!(env!("OUT_DIR"), "/generated.rs"));
 
 static DO_CACHE: &'static [&str] = &["application/wasm", "application/javascript", "text/css"];
 
-/////////////////////////////
-
-async fn found(
-    request: HttpRequest,
-    queries: web::Query<HashMap<String, String>>,
-) -> impl Responder {
-    HttpResponse::Ok().body(render(request.uri().to_string(), queries.into_inner()).await)
-}
-
-#[get("/{tail:.*}")]
-async fn not_found(
-    request: HttpRequest,
-    queries: web::Query<HashMap<String, String>>,
-) -> impl Responder {
-    HttpResponse::NotFound().body(render(request.uri().to_string(), queries.into_inner()).await)
-}
-
-//////////////////////////////
+////////////////////////
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -63,7 +50,7 @@ async fn main() -> std::io::Result<()> {
                     .skip_handler_when_not_found(),
             );
 
-        for route in client::Route::routes().into_iter() {
+        for route in client::Routes::routes().into_iter() {
             let split = route.trim_start_matches("/").split("/");
 
             let mut parts: Vec<String> = Vec::new();
@@ -87,49 +74,13 @@ async fn main() -> std::io::Result<()> {
                 continue;
             }
 
-            app = app.route(&route, web::route().to(found));
+            app = app.route(&route, web::route().to(endpoints::found));
         }
 
-        app.service(not_found)
+        app.service(endpoints::not_found)
             .wrap(actix_web::middleware::Logger::default())
     })
     .bind(("0.0.0.0", 80))?
     .run()
     .await
-}
-
-//////////////////////////////
-
-async fn render(url: String, queries: HashMap<String, String>) -> String {
-    let renderer =
-        yew::ServerRenderer::<client::ServerApp>::with_props(move || client::ServerAppProps {
-            url: url.into(),
-            queries,
-        });
-
-    let generated = generate();
-
-    let index_html_s = std::str::from_utf8(
-        generated
-            .get("index.html")
-            .expect("index.html not found")
-            .data,
-    )
-    .expect("index.html could not be parsed");
-
-    let (index_html_before, index_html_after) = index_html_s.split_once("<body>").unwrap();
-    let mut index_html_before = index_html_before.to_owned();
-    index_html_before.push_str("<body>");
-    let index_html_after = index_html_after.to_owned();
-
-    let index_html_before = index_html_before.clone();
-    let index_html_after = index_html_after.clone();
-
-    let mut html = String::new();
-
-    html.push_str(&index_html_before);
-    html.push_str(&renderer.render().await);
-    html.push_str(&index_html_after);
-
-    html
 }

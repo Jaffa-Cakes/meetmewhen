@@ -1,5 +1,8 @@
 use super::*;
 
+////////////////////////
+/// Week Component
+
 #[derive(PartialEq, Properties)]
 pub struct WeekProps {
     pub selected: Vec<time::Weekday>,
@@ -26,18 +29,20 @@ pub fn Week(props: &WeekProps) -> Html {
     }
 }
 
-//////////////////////////////////////////////////////////////
+////////////////////////
+/// Weekday Selector
+// The individual selectable bar representing a single day of the week
 
 #[derive(Properties, PartialEq)]
-struct Props {
+struct DayProps {
     day: time::Weekday,
     selected: Vec<time::Weekday>,
     toggle: Callback<time::Weekday>,
 }
 
 #[function_component]
-fn Day(props: &Props) -> Html {
-    let Props {
+fn Day(props: &DayProps) -> Html {
+    let DayProps {
         day,
         selected,
         toggle,

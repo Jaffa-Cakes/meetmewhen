@@ -15,7 +15,7 @@ impl Service {
         Server::new(Service { db })
     }
 }
-// test
+
 #[tonic::async_trait]
 impl Trait for Service {
     async fn create(&self, req: Request<Bytes>) -> Result<Response<Bytes>, Status> {
