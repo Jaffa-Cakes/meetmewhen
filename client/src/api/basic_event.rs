@@ -2,11 +2,6 @@ use super::*;
 
 use crate::basic_event::*;
 
-pub enum Type {
-    Dates = 0,
-    Days = 1,
-}
-
 pub struct Service;
 
 impl Service {

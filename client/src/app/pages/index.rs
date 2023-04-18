@@ -51,10 +51,7 @@ pub fn Index() -> Html {
                     Some(input) => input.value(),
                     None => todo!("Handle name error"),
                 };
-                // let when = match form.when.cast::<HtmlInputElement>() {
-                //     Some(input) => input.value(),
-                //     None => todo!("Handle when error"),
-                // };
+
                 let dates_selected = &*dates_selected;
                 let dates_selected = dates_selected.clone();
                 let days_selected = &*days_selected;
@@ -81,6 +78,7 @@ pub fn Index() -> Html {
                     }
                     None => todo!("Handle no_earlier error"),
                 };
+
                 let no_later = match form.no_later.cast::<HtmlInputElement>() {
                     Some(input) => {
                         let input = match input.value().parse::<u8>() {
@@ -126,18 +124,8 @@ pub fn Index() -> Html {
         let when_selected = when_selected.clone();
         let form = form.clone();
 
-        Callback::from(move |e: web_sys::Event| {
-            // let dates_selected = form.r#type.cast::<HtmlInputElement>();
-            // let dates_selected = dates_selected.clone();
-
-            // use wasm_bindgen::JsCast;
-
-            // let target: Option<web_sys::EventTarget> = e.target();
-
-            // let input = target.and_then(|target| target.dyn_into::<HtmlInputElement>().ok());
+        Callback::from(move |_| {
             let input = form.r#type.cast::<HtmlInputElement>();
-
-            // panic!("HERE: {:#?}", input.unwrap().value());
 
             if let Some(input) = input {
                 let value = input.value();

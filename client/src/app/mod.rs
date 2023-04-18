@@ -1,6 +1,3 @@
-#[cfg(target_arch = "wasm32")]
-use super::api;
-
 use api_types::prelude::*;
 
 use std::collections::HashMap;
