@@ -1,3 +1,5 @@
+use crate::api;
+
 use super::*;
 
 #[derive(PartialEq, Clone)]
@@ -5,6 +7,8 @@ enum Status {
     Waiting,
     Received(api_types::basic_event::get::Res),
 }
+
+/////////////////////////
 
 #[derive(Properties, PartialEq)]
 pub struct Props {
@@ -78,10 +82,130 @@ fn Loader(props: &LoaderProps) -> Html {
         }
         Status::Received(res) => {
             html! {
-                <div class="grid place-content-center w-screen h-screen">
-                    <h1 class="text-4xl">{ format!("{:#?}", res) }</h1>
-                </div>
+                <Page {res} />
             }
         }
+    }
+}
+
+/////////////////////////
+
+#[derive(PartialEq, Properties)]
+struct PageProps {
+    res: api_types::basic_event::get::Res,
+}
+
+#[function_component]
+fn Page(props: &PageProps) -> Html {
+    let PageProps {
+        res:
+            api_types::basic_event::get::Res {
+                id,
+                name,
+                when,
+                no_earlier,
+                no_later,
+                timezone,
+                created,
+            },
+    } = props;
+
+    let times_selected = {
+        let when = match when {
+            api_types::basic_event::When::Date(_) => api_types::basic_event::When::Date(vec![]),
+            api_types::basic_event::When::Day(_) => api_types::basic_event::When::Day(vec![]),
+        };
+
+        use_state_eq(|| when)
+    };
+
+    let time_toggle = {
+        let times_selected = times_selected.clone();
+
+        Callback::from(move |time: api_types::basic_event::When| {
+            let time = match time {
+                api_types::basic_event::When::Date(time) => {
+                    if let api_types::basic_event::When::Date(times_unwrapped) = &*times_selected {
+                        let time = time.first().unwrap();
+
+                        match times_unwrapped.contains(&time) {
+                            // We are removing the time
+                            true => {
+                                let inner = &*times_unwrapped;
+                                let mut inner = inner.clone();
+
+                                let index = inner.iter().position(|i| *i == *time).unwrap();
+
+                                inner.remove(index);
+
+                                times_selected.set(api_types::basic_event::When::Date(inner));
+                            }
+                            // We are adding the time
+                            false => {
+                                let inner = &*times_unwrapped;
+                                let mut inner = inner.clone();
+
+                                inner.push(*time);
+
+                                times_selected.set(api_types::basic_event::When::Date(inner));
+                            }
+                        }
+                    } else {
+                        panic!("This should never happen!");
+                    }
+                }
+                api_types::basic_event::When::Day(time) => {
+                    if let api_types::basic_event::When::Day(times_unwrapped) = &*times_selected {
+                        let time = time.first().unwrap();
+
+                        match times_unwrapped.contains(&time) {
+                            // We are removing the time
+                            true => {
+                                let inner = &*times_unwrapped;
+                                let mut inner = inner.clone();
+
+                                let index = inner.iter().position(|i| *i == *time).unwrap();
+
+                                inner.remove(index);
+
+                                times_selected.set(api_types::basic_event::When::Day(inner));
+                            }
+                            // We are adding the time
+                            false => {
+                                let inner = &*times_unwrapped;
+                                let mut inner = inner.clone();
+
+                                inner.push(*time);
+
+                                times_selected.set(api_types::basic_event::When::Day(inner));
+                            }
+                        }
+                    } else {
+                        panic!("This should never happen!");
+                    }
+                }
+            };
+        })
+    };
+
+    let when = when.clone();
+    let no_earlier = no_earlier.clone();
+    let no_later = no_later.clone();
+
+    let times_selected = &*times_selected;
+    let times_selected = times_selected.clone();
+
+    html! {
+        <div class="grid place-content-center w-screen h-screen">
+            <div class="flex justify-around w-screen">
+                <div class="flex flex-col bg-zinc-800">
+                    <div class="text-2xl font-bold">{name}</div>
+                </div>
+
+                <div class="flex flex-row bg-zinc-800">
+                    <components::TimeSelector {when} {no_earlier} {no_later} toggle={time_toggle} selected={times_selected} />
+                </div>
+            </div>
+        </div>
     }
 }
