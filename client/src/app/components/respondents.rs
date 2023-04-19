@@ -19,6 +19,31 @@ pub fn Respondents(props: &Props) -> Html {
     } = props;
 
     let days_iter = (0..*num_days).collect::<Vec<u16>>();
+    let highest_count = {
+        let mut highest = 1;
+
+        if respondents.len() > 0 {
+            for d in 0..*num_days {
+                for s in 0..*num_slots {
+                    let mut slot_count = 0;
+
+                    for r in respondents.iter() {
+                        let availabilities = &r.availabilities.0.get(&d).unwrap().1;
+
+                        if availabilities.contains(&s) {
+                            slot_count += 1;
+                        }
+                    }
+
+                    if slot_count > highest {
+                        highest = slot_count;
+                    }
+                }
+            }
+        }
+
+        highest
+    };
 
     html! {
         <div class="bg-zinc-800 rounded-lg p-4">
@@ -30,7 +55,7 @@ pub fn Respondents(props: &Props) -> Html {
                         let respondents = respondents.clone();
 
                         html! {
-                            <Day {respondents} {day} {num_slots} />
+                            <Day {respondents} {day} {num_slots} {highest_count} />
                         }
                     })
                 }
@@ -41,12 +66,14 @@ pub fn Respondents(props: &Props) -> Html {
 
 ////////////////////////
 /// Individual Days
+// Highest count is the largest number of people available on a given day
 
 #[derive(Properties, PartialEq)]
 struct DayProps {
     pub respondents: Vec<api_types::availabilities::get::Respondent>,
     pub num_slots: u16,
     pub day: u16,
+    pub highest_count: u16,
 }
 
 #[function_component]
@@ -55,6 +82,7 @@ fn Day(props: &DayProps) -> Html {
         respondents,
         num_slots,
         day,
+        highest_count,
     } = props;
 
     let slots_iter = (0..*num_slots).collect::<Vec<u16>>();
@@ -67,7 +95,7 @@ fn Day(props: &DayProps) -> Html {
                     let respondents = respondents.clone();
 
                     html! {
-                        <Slot {respondents} {day} {slot} />
+                        <Slot {respondents} {day} {slot} {highest_count} />
                     }
                 })
             }
@@ -83,6 +111,7 @@ struct SlotProps {
     pub respondents: Vec<api_types::availabilities::get::Respondent>,
     pub slot: u16,
     pub day: u16,
+    pub highest_count: u16,
 }
 
 #[function_component]
@@ -91,9 +120,16 @@ fn Slot(props: &SlotProps) -> Html {
         respondents,
         slot,
         day,
+        highest_count,
     } = props;
+    /* If we want to calculate opacity based on the total number of respondents
+    instead of based on the maximum number of respondents that selected an individual
+    slot, uncomment this and comment out the line underneath.
 
-    let total_resp = respondents.len();
+    This should be made a UI option in the future so the user is able to view both. */
+    // let total_resp = respondents.len();
+    let total_resp = *highest_count;
+
     let total_selected = respondents
         .iter()
         .filter(|resp| {
