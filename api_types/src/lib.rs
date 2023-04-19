@@ -1,5 +1,8 @@
+use std::collections::BTreeMap;
+
 use serde::{Deserialize, Serialize};
 
+pub mod availabilities;
 pub mod basic_event;
 
 pub trait Validate {

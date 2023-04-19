@@ -1,15 +1,18 @@
 use crate::schema;
 use crate::Database;
+use api_types::prelude::*;
 use diesel::prelude::*;
 use tonic::{Request, Response, Status};
 
 pub use server::server;
 
+mod availabilities;
 mod basic_event;
 
 mod server {
     use crate::database::Database;
 
+    use super::availabilities;
     use super::basic_event;
 
     use std::time::Duration;
@@ -52,6 +55,7 @@ mod server {
             )
             .layer(GrpcWebLayer::new())
             .add_service(basic_event::Service::server(db.clone()))
+            .add_service(availabilities::Service::server(db.clone()))
             .serve(addr)
             .await?;
 

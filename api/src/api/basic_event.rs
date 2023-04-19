@@ -4,7 +4,6 @@ use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 
 use api::basic_event::*;
-use api_types::prelude::*;
 
 pub struct Service {
     db: Database,

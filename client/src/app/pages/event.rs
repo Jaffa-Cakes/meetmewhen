@@ -106,6 +106,7 @@ fn Page(props: &PageProps) -> Html {
     let PageProps {
         res:
             api_types::basic_event::get::Res {
+                id,
                 name,
                 when,
                 no_earlier,
@@ -119,6 +120,33 @@ fn Page(props: &PageProps) -> Html {
         let generated = components::time_selector::gen_selected(when);
 
         use_state_eq(|| generated)
+    };
+
+    let onsubmit = {
+        let selected = selected.clone();
+        let id = id.clone();
+
+        Callback::from(move |e: SubmitEvent| {
+            e.prevent_default();
+            let selected = selected.clone();
+            let id = id.clone();
+
+            wait(async move {
+                let selected = &*selected;
+                let selected = selected.clone();
+
+                let res =
+                    crate::api::Availabilities::create(api_types::availabilities::create::Req {
+                        basic_event: id,
+                        name: "Jedd".to_string(),
+                        availabilities: api_types::availabilities::Availabilities(selected),
+                    })
+                    .await
+                    .unwrap();
+
+                log::info!("{:?}", res);
+            });
+        })
     };
 
     let toggle = {
@@ -154,7 +182,7 @@ fn Page(props: &PageProps) -> Html {
 
     html! {
         <div class="grid place-content-center w-screen h-screen">
-            <div class="flex justify-around w-screen">
+            <form class="flex justify-around w-screen" {onsubmit}>
                 <div class="flex flex-col bg-zinc-800">
                     <div class="text-2xl font-bold">{name}</div>
                 </div>
@@ -162,7 +190,11 @@ fn Page(props: &PageProps) -> Html {
                 <div class="flex flex-row bg-zinc-800">
                     <components::TimeSelector {num_slots} {toggle} {selected} />
                 </div>
-            </div>
+
+                <atoms::Button r#type={atoms::ButtonType::Submit}>
+                    {"Submit"}
+                </atoms::Button>
+            </form>
         </div>
     }
 }

@@ -36,12 +36,7 @@ pub fn gen_selected(when: &api_types::basic_event::When) -> Selected {
 
 ////////////////////////
 /// Simplified Time Representation
-
-#[derive(PartialEq, Clone)]
-pub enum BasicWhen {
-    Date(time::Date),
-    Day(time::Weekday),
-}
+pub use api_types::availabilities::BasicWhen;
 
 ////////////////////////
 /// Calculate Time Slots
