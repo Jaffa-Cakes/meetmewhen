@@ -6,7 +6,12 @@ use super::*;
 #[derive(PartialEq, Clone)]
 enum Status {
     Waiting,
-    Received(api_types::basic_event::get::Res),
+    Received(
+        (
+            api_types::basic_event::get::Res,
+            api_types::availabilities::get::Res,
+        ),
+    ),
 }
 
 ////////////////////////
@@ -39,7 +44,18 @@ pub fn Event(props: &Props) -> Html {
                     })
                     .await
                     {
-                        Ok(res) => Status::Received(res),
+                        Ok(event) => {
+                            match crate::api::Availabilities::get(
+                                api_types::availabilities::get::Req {
+                                    basic_event: id.clone(),
+                                },
+                            )
+                            .await
+                            {
+                                Ok(responses) => Status::Received((event, responses)),
+                                Err(_) => todo!("Handle responses error"),
+                            }
+                        }
                         Err(_) => todo!("Handle event not existing"),
                     },
                 );
@@ -85,9 +101,9 @@ fn Loader(props: &LoaderProps) -> Html {
                 </div>
             }
         }
-        Status::Received(res) => {
+        Status::Received((event, responses)) => {
             html! {
-                <Page {res} />
+                <Page {event} {responses} />
             }
         }
     }
@@ -98,13 +114,14 @@ fn Loader(props: &LoaderProps) -> Html {
 
 #[derive(PartialEq, Properties)]
 struct PageProps {
-    res: api_types::basic_event::get::Res,
+    event: api_types::basic_event::get::Res,
+    responses: api_types::availabilities::get::Res,
 }
 
 #[function_component]
 fn Page(props: &PageProps) -> Html {
     let PageProps {
-        res:
+        event:
             api_types::basic_event::get::Res {
                 id,
                 name,
@@ -113,6 +130,7 @@ fn Page(props: &PageProps) -> Html {
                 no_later,
                 ..
             },
+        responses: api_types::availabilities::get::Res { respondents, .. },
     } = props;
 
     let num_slots = components::time_selector::num_slots(*no_earlier, *no_later);
@@ -180,6 +198,11 @@ fn Page(props: &PageProps) -> Html {
     let selected = &*selected;
     let selected = selected.clone();
 
+    let respondents = &*respondents;
+    let respondents = respondents.clone();
+
+    let num_days = selected.len() as u16;
+
     html! {
         <div class="grid place-content-center w-screen h-screen">
             <form class="flex justify-around w-screen" {onsubmit}>
@@ -194,6 +217,8 @@ fn Page(props: &PageProps) -> Html {
                 <atoms::Button r#type={atoms::ButtonType::Submit}>
                     {"Submit"}
                 </atoms::Button>
+
+                <components::Respondents {respondents} {num_days} {num_slots} />
             </form>
         </div>
     }
