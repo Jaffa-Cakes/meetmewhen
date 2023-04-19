@@ -4,6 +4,6 @@ pub use calendar::Calendar;
 pub use time_selector::TimeSelector;
 pub use week::Week;
 
-mod calendar;
-mod time_selector;
-mod week;
+pub mod calendar;
+pub mod time_selector;
+pub mod week;

@@ -106,100 +106,51 @@ fn Page(props: &PageProps) -> Html {
     let PageProps {
         res:
             api_types::basic_event::get::Res {
-                id,
                 name,
                 when,
                 no_earlier,
                 no_later,
-                timezone,
-                created,
+                ..
             },
     } = props;
 
-    let times_selected = {
-        let when = match when {
-            api_types::basic_event::When::Date(_) => api_types::basic_event::When::Date(vec![]),
-            api_types::basic_event::When::Day(_) => api_types::basic_event::When::Day(vec![]),
-        };
+    let num_slots = components::time_selector::num_slots(*no_earlier, *no_later);
+    let selected = {
+        let generated = components::time_selector::gen_selected(when);
 
-        use_state_eq(|| when)
+        use_state_eq(|| generated)
     };
 
-    let time_toggle = {
-        let times_selected = times_selected.clone();
+    let toggle = {
+        let selected = selected.clone();
 
-        Callback::from(move |time: api_types::basic_event::When| {
-            let time = match time {
-                api_types::basic_event::When::Date(time) => {
-                    if let api_types::basic_event::When::Date(times_unwrapped) = &*times_selected {
-                        let time = time.first().unwrap();
+        Callback::from(move |time: (u16, u16)| {
+            let inner = &*selected;
+            let mut inner = inner.clone();
 
-                        match times_unwrapped.contains(&time) {
-                            // We are removing the time
-                            true => {
-                                let inner = &*times_unwrapped;
-                                let mut inner = inner.clone();
+            let indexed = &mut inner.get_mut(&time.0).unwrap().1;
 
-                                let index = inner.iter().position(|i| *i == *time).unwrap();
+            match indexed.contains(&time.1) {
+                // We are removing the time
+                true => {
+                    let to_delete = indexed.iter().position(|&r| r == time.1).unwrap();
 
-                                inner.remove(index);
+                    indexed.remove(to_delete);
 
-                                times_selected.set(api_types::basic_event::When::Date(inner));
-                            }
-                            // We are adding the time
-                            false => {
-                                let inner = &*times_unwrapped;
-                                let mut inner = inner.clone();
-
-                                inner.push(*time);
-
-                                times_selected.set(api_types::basic_event::When::Date(inner));
-                            }
-                        }
-                    } else {
-                        panic!("This should never happen!");
-                    }
+                    selected.set(inner);
                 }
-                api_types::basic_event::When::Day(time) => {
-                    if let api_types::basic_event::When::Day(times_unwrapped) = &*times_selected {
-                        let time = time.first().unwrap();
+                // We are adding the time
+                false => {
+                    indexed.push(time.1.into());
 
-                        match times_unwrapped.contains(&time) {
-                            // We are removing the time
-                            true => {
-                                let inner = &*times_unwrapped;
-                                let mut inner = inner.clone();
-
-                                let index = inner.iter().position(|i| *i == *time).unwrap();
-
-                                inner.remove(index);
-
-                                times_selected.set(api_types::basic_event::When::Day(inner));
-                            }
-                            // We are adding the time
-                            false => {
-                                let inner = &*times_unwrapped;
-                                let mut inner = inner.clone();
-
-                                inner.push(*time);
-
-                                times_selected.set(api_types::basic_event::When::Day(inner));
-                            }
-                        }
-                    } else {
-                        panic!("This should never happen!");
-                    }
+                    selected.set(inner);
                 }
-            };
+            }
         })
     };
 
-    let when = when.clone();
-    let no_earlier = no_earlier.clone();
-    let no_later = no_later.clone();
-
-    let times_selected = &*times_selected;
-    let times_selected = times_selected.clone();
+    let selected = &*selected;
+    let selected = selected.clone();
 
     html! {
         <div class="grid place-content-center w-screen h-screen">
@@ -209,7 +160,7 @@ fn Page(props: &PageProps) -> Html {
                 </div>
 
                 <div class="flex flex-row bg-zinc-800">
-                    <components::TimeSelector {when} {no_earlier} {no_later} toggle={time_toggle} selected={times_selected} />
+                    <components::TimeSelector {num_slots} {toggle} {selected} />
                 </div>
             </div>
         </div>
