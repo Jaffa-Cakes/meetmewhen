@@ -93,17 +93,17 @@ fn Loader(props: &LoaderProps) -> Html {
         checker.emit(());
     }
 
+    let loader = html! {
+        <div class="grid place-content-center w-screen h-screen">
+            <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-zinc-100 " />
+        </div>
+    };
+
     match status.clone() {
-        Status::Waiting => {
-            html! {
-                <div class="grid place-content-center w-screen h-screen">
-                    <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-zinc-100 " />
-                </div>
-            }
-        }
+        Status::Waiting => loader,
         Status::Received((event, responses)) => {
             html! {
-                <Page {event} {responses} />
+                <Page {event} {responses} {checker} />
             }
         }
     }
@@ -116,6 +116,7 @@ fn Loader(props: &LoaderProps) -> Html {
 struct PageProps {
     event: api_types::basic_event::get::Res,
     responses: api_types::availabilities::get::Res,
+    checker: Callback<()>,
 }
 
 #[function_component]
@@ -131,6 +132,7 @@ fn Page(props: &PageProps) -> Html {
                 ..
             },
         responses: api_types::availabilities::get::Res { respondents, .. },
+        checker,
     } = props;
 
     let num_slots = components::time_selector::num_slots(*no_earlier, *no_later);
@@ -142,27 +144,31 @@ fn Page(props: &PageProps) -> Html {
 
     let onsubmit = {
         let selected = selected.clone();
+        let checker = checker.clone();
+        let when = when.clone();
         let id = id.clone();
 
         Callback::from(move |e: SubmitEvent| {
             e.prevent_default();
             let selected = selected.clone();
+            let checker = checker.clone();
+            let when = when.clone();
             let id = id.clone();
 
             wait(async move {
-                let selected = &*selected;
-                let selected = selected.clone();
+                let inner = &*selected;
+                let inner = inner.clone();
 
-                let res =
-                    crate::api::Availabilities::create(api_types::availabilities::create::Req {
-                        basic_event: id,
-                        name: "Jedd".to_string(),
-                        availabilities: api_types::availabilities::Availabilities(selected),
-                    })
-                    .await
-                    .unwrap();
+                crate::api::Availabilities::create(api_types::availabilities::create::Req {
+                    basic_event: id,
+                    name: "Jedd".to_string(),
+                    availabilities: api_types::availabilities::Availabilities(inner),
+                })
+                .await
+                .unwrap();
 
-                log::info!("{:?}", res);
+                selected.set(components::time_selector::gen_selected(&when));
+                checker.emit(());
             });
         })
     };
@@ -195,6 +201,14 @@ fn Page(props: &PageProps) -> Html {
         })
     };
 
+    let refresh = {
+        let checker = checker.clone();
+
+        Callback::from(move |_| {
+            checker.emit(());
+        })
+    };
+
     let selected = &*selected;
     let selected = selected.clone();
 
@@ -219,6 +233,10 @@ fn Page(props: &PageProps) -> Html {
                 </atoms::Button>
 
                 <components::Respondents {respondents} {num_days} {num_slots} />
+
+                <atoms::Button onclick={refresh}>
+                    {"Refresh"}
+                </atoms::Button>
             </form>
         </div>
     }

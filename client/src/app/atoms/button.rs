@@ -24,6 +24,8 @@ pub struct Props {
     pub children: Children,
     #[prop_or(Type::Button)]
     pub r#type: Type,
+    #[prop_or_default]
+    pub onclick: Callback<MouseEvent>,
 }
 
 #[function_component]
@@ -32,10 +34,11 @@ pub fn Button(props: &Props) -> Html {
         class,
         children,
         r#type,
+        onclick,
     } = props;
 
     html! {
-        <button class={classes!("bg-zinc-800", "rounded", "text-zinc-100", "p-2", "pt-1", "mt-4", "cursor-pointer", "hover:bg-zinc-700", class.clone())} type={r#type.to_string()} >
+        <button class={classes!("bg-zinc-800", "rounded", "text-zinc-100", "p-2", "pt-1", "mt-4", "cursor-pointer", "hover:bg-zinc-700", class.clone())} type={r#type.to_string()} {onclick}>
             { for children.iter() }
         </button>
     }
