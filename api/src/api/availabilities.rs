@@ -66,7 +66,7 @@ impl Trait for Service {
                     .into_iter()
                     .map(|r| {
                         let id = r.0;
-                        let name = r.1;
+                        let name = r.2;
                         let availabilities =
                             api_types::availabilities::Availabilities::from_bincode(&r.3).unwrap();
 

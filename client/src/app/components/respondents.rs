@@ -18,6 +18,8 @@ pub fn Respondents(props: &Props) -> Html {
         num_days,
     } = props;
 
+    let hovered: UseStateHandle<Option<(u16, u16)>> = { use_state_eq(|| None) };
+
     let days_iter = (0..*num_days).collect::<Vec<u16>>();
     let highest_count = {
         let mut highest = 1;
@@ -45,17 +47,31 @@ pub fn Respondents(props: &Props) -> Html {
         highest
     };
 
+    let set_hovered = {
+        let hovered = hovered.clone();
+
+        Callback::from(move |new: Option<(u16, u16)>| {
+            hovered.set(new);
+        })
+    };
+
+    let respondents = &*respondents;
+    let respondents = respondents.clone();
+    let hovered = &*hovered;
+    let hovered = hovered.clone();
+
     html! {
         <div class="bg-zinc-800 rounded-lg p-4">
             <h2 class="text-2xl font-bold text-zinc-100">{"Responses"}</h2>
             <div class="flex space-x-2">
+                <Info respondents={respondents.clone()} {hovered} />
+
                 {
                     for days_iter.iter().map(|day| {
-                        let respondents = &*respondents;
-                        let respondents = respondents.clone();
+                        let set_hovered = set_hovered.clone();
 
                         html! {
-                            <Day {respondents} {day} {num_slots} {highest_count} />
+                            <Day respondents={respondents.clone()} {day} {num_slots} {highest_count} {set_hovered} />
                         }
                     })
                 }
@@ -70,10 +86,11 @@ pub fn Respondents(props: &Props) -> Html {
 
 #[derive(Properties, PartialEq)]
 struct DayProps {
-    pub respondents: Vec<api_types::availabilities::get::Respondent>,
-    pub num_slots: u16,
-    pub day: u16,
-    pub highest_count: u16,
+    respondents: Vec<api_types::availabilities::get::Respondent>,
+    num_slots: u16,
+    day: u16,
+    highest_count: u16,
+    set_hovered: Callback<Option<(u16, u16)>>,
 }
 
 #[function_component]
@@ -83,6 +100,7 @@ fn Day(props: &DayProps) -> Html {
         num_slots,
         day,
         highest_count,
+        set_hovered,
     } = props;
 
     let slots_iter = (0..*num_slots).collect::<Vec<u16>>();
@@ -95,7 +113,7 @@ fn Day(props: &DayProps) -> Html {
                     let respondents = respondents.clone();
 
                     html! {
-                        <Slot {respondents} {day} {slot} {highest_count} />
+                        <Slot {respondents} {day} {slot} {highest_count} {set_hovered} />
                     }
                 })
             }
@@ -108,10 +126,11 @@ fn Day(props: &DayProps) -> Html {
 
 #[derive(Properties, PartialEq)]
 struct SlotProps {
-    pub respondents: Vec<api_types::availabilities::get::Respondent>,
-    pub slot: u16,
-    pub day: u16,
-    pub highest_count: u16,
+    respondents: Vec<api_types::availabilities::get::Respondent>,
+    slot: u16,
+    day: u16,
+    highest_count: u16,
+    set_hovered: Callback<Option<(u16, u16)>>,
 }
 
 #[function_component]
@@ -121,6 +140,7 @@ fn Slot(props: &SlotProps) -> Html {
         slot,
         day,
         highest_count,
+        set_hovered,
     } = props;
     /* If we want to calculate opacity based on the total number of respondents
     instead of based on the maximum number of respondents that selected an individual
@@ -144,9 +164,89 @@ fn Slot(props: &SlotProps) -> Html {
 
     let style = format!("opacity: {}%;", percentage);
 
-    html! {
-        <div class="bg-white h-6 w-12" {style}>
+    let onmouseenter = {
+        let day = day.clone();
+        let slot = slot.clone();
+        let set_hovered = set_hovered.clone();
 
-        </div>
+        Callback::from(move |_| {
+            set_hovered.emit(Some((day, slot)));
+        })
+    };
+
+    let onmouseleave = {
+        let set_hovered = set_hovered.clone();
+
+        Callback::from(move |_| {
+            set_hovered.emit(None);
+        })
+    };
+
+    html! {
+        <div class="bg-white h-6 w-12" {style} {onmouseenter} {onmouseleave} />
+    }
+}
+
+////////////////////////
+/// Info Panel
+
+#[derive(Properties, PartialEq)]
+struct InfoProps {
+    respondents: Vec<api_types::availabilities::get::Respondent>,
+    hovered: Option<(u16, u16)>,
+}
+
+#[function_component]
+fn Info(props: &InfoProps) -> Html {
+    let InfoProps {
+        respondents,
+        hovered,
+    } = props;
+
+    match hovered {
+        Some((day, slot)) => {
+            let mut available = vec![];
+            let mut unavailable = vec![];
+
+            for r in respondents.iter() {
+                let availabilities = &r.availabilities.0.get(&day).unwrap().1;
+                let name = r.name.clone();
+
+                match availabilities.contains(&slot) {
+                    true => available.push(name),
+                    false => unavailable.push(name),
+                };
+            }
+
+            html! {
+                <div class="w-48">
+                    <h1>{"Respondents"}</h1>
+
+                    <div class="flex space-x-4">
+                        <div class="flex flex-col space-y-2">
+                            <span>{"Available"}</span>
+                            {
+                                for available.iter().map(|name| {
+                                    html! {
+                                        <span>{name}</span>
+                                    }
+                                })
+                            }
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <span>{"Unavailable"}</span>
+                            {
+                                for unavailable.iter().map(|name| {
+                                    html! {
+                                        <span>{name}</span>
+                                    }
+                                })
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        None => html! { <div class="w-48" /> },
     }
 }
