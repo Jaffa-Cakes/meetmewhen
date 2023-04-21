@@ -17,7 +17,14 @@ pub fn Calendar(props: &CalendarProps) -> Html {
     let CalendarProps { selected, toggle } = props;
 
     let anchor = {
-        let mut anchor = time::Date::from_calendar_date(2022, time::Month::December, 15).unwrap();
+        let epoch = wasm_timer::SystemTime::now()
+            .duration_since(wasm_timer::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+
+        let mut anchor = time::OffsetDateTime::from_unix_timestamp(epoch as i64)
+            .unwrap()
+            .date();
 
         while anchor.weekday() != time::Weekday::Monday {
             anchor = anchor - time::Duration::days(1);
