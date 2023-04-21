@@ -301,9 +301,9 @@ fn Page(props: &PageProps) -> Html {
 
             <div class="flex justify-around w-screen">
                 <form class="flex flex-col bg-zinc-800 p-4 rounded" {onsubmit}>
-                    <span class="text-center text-2xl font-bold mb-2">{"Select your availability"}</span>
+                    <span class="text-center text-2xl font-bold mb-2">{"Select Your Availability"}</span>
 
-                    <label>
+                    <label class="mx-auto">
                         {"Respondent:"}
                         <atoms::Select class="!bg-zinc-900 ml-2" r#ref={selected_respondent} onchange={change_respondent}>
                             <option value="new" selected={true}>{"New"}</option>

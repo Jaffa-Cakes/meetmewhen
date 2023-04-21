@@ -200,8 +200,8 @@ fn Slot(props: &SlotProps) -> Html {
     };
 
     html! {
-        <div class="border h-6 w-12">
-            <div class="bg-white h-full w-full" {style} {onmouseenter} {onmouseleave} />
+        <div class="border h-6 w-12 hover:bg-red-800">
+            <div class="bg-white h-full w-full hover:bg-transparent" {style} {onmouseenter} {onmouseleave} />
         </div>
     }
 }
