@@ -62,10 +62,8 @@ pub fn Respondents(props: &Props) -> Html {
 
     html! {
         <div class="bg-zinc-800 rounded-lg p-4">
-            <h2 class="text-2xl font-bold text-zinc-100">{"Responses"}</h2>
-            <div class="flex space-x-2">
-                <Info respondents={respondents.clone()} {hovered} />
-
+            <h2 class="text-2xl font-bold text-zinc-100 text-center mb-4">{"Responses"}</h2>
+            <div class="flex space-x-2 justify-center">
                 {
                     for days_iter.iter().map(|day| {
                         let set_hovered = set_hovered.clone();
@@ -75,6 +73,10 @@ pub fn Respondents(props: &Props) -> Html {
                         }
                     })
                 }
+            </div>
+
+            <div class="flex justify-center">
+                <Info respondents={respondents.clone()} {hovered} />
             </div>
         </div>
     }
@@ -219,12 +221,12 @@ fn Info(props: &InfoProps) -> Html {
             }
 
             html! {
-                <div class="w-48">
-                    <h1>{"Respondents"}</h1>
+                <div class="h-64 w-48 mx-auto">
+                    <h1 class="font-bold text-lg text-center">{"Respondents"}</h1>
 
                     <div class="flex space-x-4">
                         <div class="flex flex-col space-y-2">
-                            <span>{"Available"}</span>
+                            <span class="font-bold text-center">{"Available"}</span>
                             {
                                 for available.iter().map(|name| {
                                     html! {
@@ -234,7 +236,7 @@ fn Info(props: &InfoProps) -> Html {
                             }
                         </div>
                         <div class="flex flex-col space-y-2">
-                            <span>{"Unavailable"}</span>
+                            <span class="font-bold text-center">{"Unavailable"}</span>
                             {
                                 for unavailable.iter().map(|name| {
                                     html! {
@@ -247,6 +249,6 @@ fn Info(props: &InfoProps) -> Html {
                 </div>
             }
         }
-        None => html! { <div class="w-48" /> },
+        None => html! { <div class="h-64 w-48" /> },
     }
 }

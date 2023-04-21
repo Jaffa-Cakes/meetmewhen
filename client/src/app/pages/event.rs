@@ -230,15 +230,15 @@ fn Page(props: &PageProps) -> Html {
 
     html! {
         <div class="grid place-content-center w-screen h-screen">
+            <div class="flex justify-center w-screen mb-12">
+                <h1 class="text-4xl font-bold">{name}</h1>
+            </div>
+
             <div class="flex justify-around w-screen">
-                <div class="flex flex-col bg-zinc-800">
-                    <div class="text-2xl font-bold">{name}</div>
-                </div>
-
                 <form class="flex flex-col bg-zinc-800 p-4 rounded" {onsubmit}>
-                    <span>{"Select your availability"}</span>
+                    <span class="text-center text-2xl font-bold">{"Select your availability"}</span>
 
-                    <div class="flex flex-row">
+                    <div class="flex flex-row justify-center">
                         <components::TimeSelector {num_slots} {toggle} {selected} />
                     </div>
 
@@ -247,7 +247,7 @@ fn Page(props: &PageProps) -> Html {
                         <atoms::InputText class="!bg-zinc-900 ml-2" r#ref={user_name} />
                     </label>
 
-                    <atoms::Button r#type={atoms::ButtonType::Submit}>
+                    <atoms::Button r#type={atoms::ButtonType::Submit} class="!bg-zinc-900 hover:!bg-zinc-700">
                         {"Submit"}
                     </atoms::Button>
                 </form>
