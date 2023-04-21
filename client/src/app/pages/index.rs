@@ -234,9 +234,9 @@ pub fn Index() -> Html {
 
                     <atoms::Button r#type={atoms::ButtonType::Submit}>{ "Create Event" }</atoms::Button>
 
-                    <Link<Routes> to={Routes::NotFound}>
-                        { "Not Found Page" }
-                    </Link<Routes>>
+                    // <Link<Routes> to={Routes::NotFound}>
+                    //     { "Not Found Page" }
+                    // </Link<Routes>>
                 </div>
 
                 <div class="bg-zinc-800 p-5 pt-4 rounded-2xl">
