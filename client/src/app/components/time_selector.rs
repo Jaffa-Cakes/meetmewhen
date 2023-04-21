@@ -61,6 +61,7 @@ pub fn num_slots(no_earlier: time::Time, no_later: time::Time) -> u16 {
 
 #[derive(PartialEq, Properties)]
 pub struct TimeSelectorProps {
+    pub no_earlier: time::Time,
     pub num_slots: u16,
     pub selected: Selected,
     pub toggle: Callback<(u16, u16)>,
@@ -69,6 +70,7 @@ pub struct TimeSelectorProps {
 #[function_component]
 pub fn TimeSelector(props: &TimeSelectorProps) -> Html {
     let TimeSelectorProps {
+        no_earlier,
         num_slots,
         selected,
         toggle,
@@ -76,8 +78,14 @@ pub fn TimeSelector(props: &TimeSelectorProps) -> Html {
 
     let num_slots = (0..*num_slots).collect::<Vec<u16>>();
 
+    let no_earlier = &*no_earlier;
+    let no_earlier = no_earlier.clone();
+
     html! {
         <>
+            <div class="flex flex-col p-4 pt-1 pr-0">
+                <components::TimeLegend no_earlier={no_earlier} num_slots={num_slots.len() as u16} />
+            </div>
             {
                 for selected.iter().map(|(index, _slots)| {
                     html! {

@@ -288,6 +288,9 @@ fn Page(props: &PageProps) -> Html {
     let respondents = &*respondents;
     let respondents = respondents.clone();
 
+    let no_earlier = &*no_earlier;
+    let no_earlier = no_earlier.clone();
+
     let num_days = selected.len() as u16;
 
     html! {
@@ -315,7 +318,7 @@ fn Page(props: &PageProps) -> Html {
                     </label>
 
                     <div class="flex flex-row justify-center">
-                        <components::TimeSelector {num_slots} {toggle} {selected} />
+                        <components::TimeSelector {num_slots} {toggle} {selected} {no_earlier} />
                     </div>
 
                     <label>
@@ -328,7 +331,7 @@ fn Page(props: &PageProps) -> Html {
                     </atoms::Button>
                 </form>
 
-                <components::Respondents {respondents} {num_days} {num_slots} {refresh} />
+                <components::Respondents {respondents} {num_days} {num_slots} {refresh} {no_earlier} />
             </div>
         </div>
     }

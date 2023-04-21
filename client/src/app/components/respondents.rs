@@ -9,6 +9,7 @@ pub struct Props {
     pub num_slots: u16,
     pub num_days: u16,
     pub refresh: Callback<MouseEvent>,
+    pub no_earlier: time::Time,
 }
 
 #[function_component]
@@ -18,6 +19,7 @@ pub fn Respondents(props: &Props) -> Html {
         num_slots,
         num_days,
         refresh,
+        no_earlier,
     } = props;
 
     let hovered: UseStateHandle<Option<(u16, u16)>> = { use_state_eq(|| None) };
@@ -61,11 +63,16 @@ pub fn Respondents(props: &Props) -> Html {
     let respondents = respondents.clone();
     let hovered = &*hovered;
     let hovered = hovered.clone();
+    let no_earlier = &*no_earlier;
+    let no_earlier = no_earlier.clone();
 
     html! {
         <div class="bg-zinc-800 rounded-lg p-4">
             <h2 class="text-2xl font-bold text-zinc-100 text-center mb-4">{"Responses"}</h2>
             <div class="flex space-x-2 justify-center">
+                <div class="flex flex-col p-4 pt-1 pr-0">
+                    <components::TimeLegend no_earlier={no_earlier} num_slots={num_slots} />
+                </div>
                 {
                     for days_iter.iter().map(|day| {
                         let set_hovered = set_hovered.clone();
@@ -114,17 +121,19 @@ fn Day(props: &DayProps) -> Html {
     let slots_iter = (0..*num_slots).collect::<Vec<u16>>();
 
     html! {
-        <div class="flex flex-col bg-zinc-700">
-            {
-                for slots_iter.iter().map(|slot| {
-                    let respondents = &*respondents;
-                    let respondents = respondents.clone();
+        <div class="p-4">
+            <div class="flex flex-col border bg-zinc-700">
+                {
+                    for slots_iter.iter().map(|slot| {
+                        let respondents = &*respondents;
+                        let respondents = respondents.clone();
 
-                    html! {
-                        <Slot {respondents} {day} {slot} {highest_count} {set_hovered} />
-                    }
-                })
-            }
+                        html! {
+                            <Slot {respondents} {day} {slot} {highest_count} {set_hovered} />
+                        }
+                    })
+                }
+            </div>
         </div>
     }
 }
@@ -191,7 +200,9 @@ fn Slot(props: &SlotProps) -> Html {
     };
 
     html! {
-        <div class="bg-white h-6 w-12" {style} {onmouseenter} {onmouseleave} />
+        <div class="border h-6 w-12">
+            <div class="bg-white h-full w-full" {style} {onmouseenter} {onmouseleave} />
+        </div>
     }
 }
 
