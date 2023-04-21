@@ -162,10 +162,12 @@ fn Page(props: &PageProps) -> Html {
                 let inner = &*selected;
                 let inner = inner.clone();
 
-                let user_name = match user_name.cast::<HtmlInputElement>() {
-                    Some(input) => input.value(),
+                let user_name_element = match user_name.cast::<HtmlInputElement>() {
+                    Some(element) => element,
                     None => todo!("Handle user name error"),
                 };
+
+                let user_name = user_name_element.value();
 
                 crate::api::Availabilities::create(api_types::availabilities::create::Req {
                     basic_event: id,
@@ -175,6 +177,7 @@ fn Page(props: &PageProps) -> Html {
                 .await
                 .unwrap();
 
+                user_name_element.set_value("");
                 selected.set(components::time_selector::gen_selected(&when));
                 checker.emit(());
             });
