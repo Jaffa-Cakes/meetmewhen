@@ -141,12 +141,14 @@ fn Page(props: &PageProps) -> Html {
 
         use_state_eq(|| generated)
     };
+    let user_name = use_node_ref();
 
     let onsubmit = {
         let selected = selected.clone();
         let checker = checker.clone();
         let when = when.clone();
         let id = id.clone();
+        let user_name = user_name.clone();
 
         Callback::from(move |e: SubmitEvent| {
             e.prevent_default();
@@ -154,14 +156,20 @@ fn Page(props: &PageProps) -> Html {
             let checker = checker.clone();
             let when = when.clone();
             let id = id.clone();
+            let user_name = user_name.clone();
 
             wait(async move {
                 let inner = &*selected;
                 let inner = inner.clone();
 
+                let user_name = match user_name.cast::<HtmlInputElement>() {
+                    Some(input) => input.value(),
+                    None => todo!("Handle user name error"),
+                };
+
                 crate::api::Availabilities::create(api_types::availabilities::create::Req {
                     basic_event: id,
-                    name: "Jedd".to_string(),
+                    name: user_name,
                     availabilities: api_types::availabilities::Availabilities(inner),
                 })
                 .await
@@ -219,25 +227,34 @@ fn Page(props: &PageProps) -> Html {
 
     html! {
         <div class="grid place-content-center w-screen h-screen">
-            <form class="flex justify-around w-screen" {onsubmit}>
+            <div class="flex justify-around w-screen">
                 <div class="flex flex-col bg-zinc-800">
                     <div class="text-2xl font-bold">{name}</div>
                 </div>
 
-                <div class="flex flex-row bg-zinc-800">
-                    <components::TimeSelector {num_slots} {toggle} {selected} />
-                </div>
+                <form class="flex flex-col bg-zinc-800 p-4 rounded" {onsubmit}>
+                    <span>{"Select your availability"}</span>
 
-                <atoms::Button r#type={atoms::ButtonType::Submit}>
-                    {"Submit"}
-                </atoms::Button>
+                    <div class="flex flex-row">
+                        <components::TimeSelector {num_slots} {toggle} {selected} />
+                    </div>
+
+                    <label>
+                        {"Name"}
+                        <atoms::InputText class="!bg-zinc-900 ml-2" r#ref={user_name} />
+                    </label>
+
+                    <atoms::Button r#type={atoms::ButtonType::Submit}>
+                        {"Submit"}
+                    </atoms::Button>
+                </form>
 
                 <components::Respondents {respondents} {num_days} {num_slots} />
 
                 <atoms::Button onclick={refresh}>
                     {"Refresh"}
                 </atoms::Button>
-            </form>
+            </div>
         </div>
     }
 }
