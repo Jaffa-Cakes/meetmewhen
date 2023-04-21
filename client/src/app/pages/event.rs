@@ -252,11 +252,7 @@ fn Page(props: &PageProps) -> Html {
                     </atoms::Button>
                 </form>
 
-                <components::Respondents {respondents} {num_days} {num_slots} />
-
-                <atoms::Button onclick={refresh}>
-                    {"Refresh"}
-                </atoms::Button>
+                <components::Respondents {respondents} {num_days} {num_slots} {refresh} />
             </div>
         </div>
     }

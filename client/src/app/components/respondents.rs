@@ -8,6 +8,7 @@ pub struct Props {
     pub respondents: Vec<api_types::availabilities::get::Respondent>,
     pub num_slots: u16,
     pub num_days: u16,
+    pub refresh: Callback<MouseEvent>,
 }
 
 #[function_component]
@@ -16,6 +17,7 @@ pub fn Respondents(props: &Props) -> Html {
         respondents,
         num_slots,
         num_days,
+        refresh,
     } = props;
 
     let hovered: UseStateHandle<Option<(u16, u16)>> = { use_state_eq(|| None) };
@@ -74,6 +76,10 @@ pub fn Respondents(props: &Props) -> Html {
                     })
                 }
             </div>
+
+            <atoms::Button onclick={refresh} class="!bg-zinc-900 hover:!bg-zinc-700 w-full mb-2">
+                {"Refresh"}
+            </atoms::Button>
 
             <div class="flex justify-center">
                 <Info respondents={respondents.clone()} {hovered} />
