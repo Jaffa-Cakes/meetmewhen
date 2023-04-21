@@ -298,7 +298,7 @@ fn Page(props: &PageProps) -> Html {
 
             <div class="flex justify-around w-screen">
                 <form class="flex flex-col bg-zinc-800 p-4 rounded" {onsubmit}>
-                    <span class="text-center text-2xl font-bold">{"Select your availability"}</span>
+                    <span class="text-center text-2xl font-bold mb-2">{"Select your availability"}</span>
 
                     <label>
                         {"Respondent:"}
