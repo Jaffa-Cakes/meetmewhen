@@ -54,4 +54,26 @@ impl Service {
             Err(err) => todo!("Handle error: {:#?}", err),
         }
     }
+
+    pub async fn update(
+        req: api_types::availabilities::update::Req,
+    ) -> Result<api_types::availabilities::update::Res, ()> {
+        let mut client = Service::client();
+
+        match client
+            .update(Bytes {
+                value: req.to_bincode(),
+            })
+            .await
+        {
+            Ok(res) => {
+                match api_types::availabilities::update::Res::from_bincode(&res.into_inner().value)
+                {
+                    Ok(res) => Ok(res),
+                    Err(_) => todo!("Handle error"),
+                }
+            }
+            Err(_) => todo!("Handle error"),
+        }
+    }
 }

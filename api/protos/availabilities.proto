@@ -5,6 +5,7 @@ package availabilities;
 service Availabilities {
   rpc Create (Bytes) returns (Bytes) {}
   rpc Get (Bytes) returns (Bytes) {}
+  rpc Update (Bytes) returns (Bytes) {}
 }
 
 message Bytes {

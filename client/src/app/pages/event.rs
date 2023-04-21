@@ -142,6 +142,7 @@ fn Page(props: &PageProps) -> Html {
         use_state_eq(|| generated)
     };
     let user_name = use_node_ref();
+    let selected_respondent = use_node_ref();
 
     let onsubmit = {
         let selected = selected.clone();
@@ -149,6 +150,7 @@ fn Page(props: &PageProps) -> Html {
         let when = when.clone();
         let id = id.clone();
         let user_name = user_name.clone();
+        let selected_respondent = selected_respondent.clone();
 
         Callback::from(move |e: SubmitEvent| {
             e.prevent_default();
@@ -157,10 +159,19 @@ fn Page(props: &PageProps) -> Html {
             let when = when.clone();
             let id = id.clone();
             let user_name = user_name.clone();
+            let selected_respondent = selected_respondent.clone();
 
             wait(async move {
                 let inner = &*selected;
                 let inner = inner.clone();
+
+                let selected_respondent_element =
+                    match selected_respondent.cast::<HtmlInputElement>() {
+                        Some(element) => element,
+                        None => todo!("Handle user name error"),
+                    };
+
+                let selected_respondent = selected_respondent_element.value();
 
                 let user_name_element = match user_name.cast::<HtmlInputElement>() {
                     Some(element) => element,
@@ -169,16 +180,28 @@ fn Page(props: &PageProps) -> Html {
 
                 let user_name = user_name_element.value();
 
-                crate::api::Availabilities::create(api_types::availabilities::create::Req {
-                    basic_event: id,
-                    name: user_name,
-                    availabilities: api_types::availabilities::Availabilities(inner),
-                })
-                .await
-                .unwrap();
+                if selected_respondent == "new" {
+                    crate::api::Availabilities::create(api_types::availabilities::create::Req {
+                        basic_event: id,
+                        name: user_name,
+                        availabilities: api_types::availabilities::Availabilities(inner),
+                    })
+                    .await
+                    .unwrap();
+                } else {
+                    crate::api::Availabilities::update(api_types::availabilities::update::Req {
+                        id: selected_respondent.parse().unwrap(),
+                        basic_event: id,
+                        name: user_name,
+                        availabilities: api_types::availabilities::Availabilities(inner),
+                    })
+                    .await
+                    .unwrap();
+                }
 
                 user_name_element.set_value("");
                 selected.set(components::time_selector::gen_selected(&when));
+                selected_respondent_element.set_value("new");
                 checker.emit(());
             });
         })
@@ -220,6 +243,45 @@ fn Page(props: &PageProps) -> Html {
         })
     };
 
+    let change_respondent = {
+        let selected_respondent = selected_respondent.clone();
+        let selected = selected.clone();
+        let user_name = user_name.clone();
+        let when = when.clone();
+        let respondents = respondents.clone();
+
+        Callback::from(move |_| {
+            let selected_respondent = match selected_respondent.cast::<HtmlInputElement>() {
+                Some(selected_respondent) => selected_respondent,
+                None => todo!("Handle error"),
+            };
+
+            if selected_respondent.value() == "new" {
+                user_name.cast::<HtmlInputElement>().unwrap().set_value("");
+                selected.set(components::time_selector::gen_selected(&when));
+                return;
+            }
+
+            let selected_respondent = match selected_respondent.value().parse::<i32>() {
+                Ok(selected_respondent) => selected_respondent,
+                Err(_) => todo!("Handle error"),
+            };
+
+            let respondent_info = respondents
+                .iter()
+                .filter(|r| r.id == selected_respondent)
+                .collect::<Vec<&api_types::availabilities::get::Respondent>>();
+
+            let respondent_info = respondent_info.first().unwrap();
+
+            selected.set(respondent_info.availabilities.0.clone());
+            user_name
+                .cast::<HtmlInputElement>()
+                .unwrap()
+                .set_value(&respondent_info.name);
+        })
+    };
+
     let selected = &*selected;
     let selected = selected.clone();
 
@@ -237,6 +299,20 @@ fn Page(props: &PageProps) -> Html {
             <div class="flex justify-around w-screen">
                 <form class="flex flex-col bg-zinc-800 p-4 rounded" {onsubmit}>
                     <span class="text-center text-2xl font-bold">{"Select your availability"}</span>
+
+                    <label>
+                        {"Respondent:"}
+                        <atoms::Select class="!bg-zinc-900 ml-2" r#ref={selected_respondent} onchange={change_respondent}>
+                            <option value="new" selected={true}>{"New"}</option>
+                            {
+                                for respondents.iter().map(|r| {
+                                    html! {
+                                        <option value={format!("{}", r.id)}>{&r.name}</option>
+                                    }
+                                })
+                            }
+                        </atoms::Select>
+                    </label>
 
                     <div class="flex flex-row justify-center">
                         <components::TimeSelector {num_slots} {toggle} {selected} />
