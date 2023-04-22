@@ -116,4 +116,28 @@ impl Trait for Service {
             value: api_types::availabilities::update::Res { id }.to_bincode(),
         }))
     }
+
+    async fn delete(&self, req: Request<Bytes>) -> Result<Response<Bytes>, Status> {
+        let Bytes { value: req } = req.into_inner();
+
+        let req = api_types::availabilities::delete::Req::from_bincode(&req).unwrap();
+
+        let mut conn = self.db.get_conn();
+
+        if let Err(_) = conn.transaction(|conn| {
+            use diesel::dsl::*;
+            use schema::availability::dsl::*;
+
+            delete(availability)
+                .filter(id.eq(req.id))
+                .filter(basic_event.eq(req.basic_event))
+                .execute(conn)
+        }) {
+            todo!("Error handling for database error")
+        }
+
+        Ok(Response::new(Bytes {
+            value: api_types::availabilities::delete::Res {}.to_bincode(),
+        }))
+    }
 }

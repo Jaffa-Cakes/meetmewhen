@@ -1,3 +1,5 @@
+use api_types::availabilities::delete;
+
 use super::*;
 
 ////////////////////////
@@ -141,6 +143,7 @@ fn Page(props: &PageProps) -> Html {
 
         use_state_eq(|| generated)
     };
+    let delete_show = use_state_eq(|| false);
     let user_name = use_node_ref();
     let selected_respondent = use_node_ref();
 
@@ -207,6 +210,53 @@ fn Page(props: &PageProps) -> Html {
         })
     };
 
+    let delete_respondent = {
+        let selected_respondent = selected_respondent.clone();
+        let delete_show = delete_show.clone();
+        let id = id.clone();
+        let selected = selected.clone();
+        let user_name = user_name.clone();
+        let checker = checker.clone();
+        let when = when.clone();
+
+        Callback::from(move |_: MouseEvent| {
+            let selected = selected.clone();
+            let delete_show = delete_show.clone();
+            let checker = checker.clone();
+            let when = when.clone();
+            let user_name = user_name.clone();
+            let selected_respondent = selected_respondent.clone();
+            let id = id.clone();
+
+            let selected_respondent_element = match selected_respondent.cast::<HtmlInputElement>() {
+                Some(element) => element,
+                None => todo!("Handle user name error"),
+            };
+
+            let selected_respondent = selected_respondent_element.value();
+
+            let user_name_element = match user_name.cast::<HtmlInputElement>() {
+                Some(element) => element,
+                None => todo!("Handle user name error"),
+            };
+
+            wait(async move {
+                crate::api::Availabilities::delete(api_types::availabilities::delete::Req {
+                    id: selected_respondent.parse().unwrap(),
+                    basic_event: id,
+                })
+                .await
+                .unwrap();
+
+                user_name_element.set_value("");
+                selected.set(components::time_selector::gen_selected(&when));
+                selected_respondent_element.set_value("new");
+                delete_show.set(false);
+                checker.emit(());
+            });
+        })
+    };
+
     let toggle = {
         let selected = selected.clone();
 
@@ -249,6 +299,7 @@ fn Page(props: &PageProps) -> Html {
         let user_name = user_name.clone();
         let when = when.clone();
         let respondents = respondents.clone();
+        let delete_show = delete_show.clone();
 
         Callback::from(move |_| {
             let selected_respondent = match selected_respondent.cast::<HtmlInputElement>() {
@@ -259,8 +310,11 @@ fn Page(props: &PageProps) -> Html {
             if selected_respondent.value() == "new" {
                 user_name.cast::<HtmlInputElement>().unwrap().set_value("");
                 selected.set(components::time_selector::gen_selected(&when));
+                delete_show.set(false);
                 return;
             }
+
+            delete_show.set(true);
 
             let selected_respondent = match selected_respondent.value().parse::<i32>() {
                 Ok(selected_respondent) => selected_respondent,
@@ -290,6 +344,9 @@ fn Page(props: &PageProps) -> Html {
 
     let no_earlier = &*no_earlier;
     let no_earlier = no_earlier.clone();
+
+    let delete_show = &*delete_show;
+    let delete_show = delete_show.clone();
 
     let num_days = selected.len() as u16;
 
@@ -329,10 +386,36 @@ fn Page(props: &PageProps) -> Html {
                     <atoms::Button r#type={atoms::ButtonType::Submit} class="!bg-zinc-900 hover:!bg-zinc-700">
                         {"Submit"}
                     </atoms::Button>
+
+                    <DeleteRespondent show={delete_show} onclick={delete_respondent} />
                 </form>
 
                 <components::Respondents {respondents} {num_days} {num_slots} {refresh} {no_earlier} />
             </div>
         </div>
+    }
+}
+
+////////////////////////
+/// Delete a Respondent
+
+#[derive(PartialEq, Properties)]
+struct DeleteRespondentProps {
+    show: bool,
+    onclick: Callback<MouseEvent>,
+}
+
+#[function_component]
+fn DeleteRespondent(props: &DeleteRespondentProps) -> Html {
+    let DeleteRespondentProps { show, onclick } = props;
+
+    if !show {
+        return html! {};
+    }
+
+    html! {
+        <atoms::Button {onclick} class="!bg-zinc-900 hover:!bg-zinc-700">
+            {"Delete"}
+        </atoms::Button>
     }
 }
