@@ -16,9 +16,24 @@ impl Service {
 #[tonic::async_trait]
 impl Trait for Service {
     async fn create(&self, req: Request<Bytes>) -> Result<Response<Bytes>, Status> {
-        let Bytes { value: req } = req.into_inner();
+        use api_types::availabilities::create::*;
 
-        let req = api_types::availabilities::create::Req::from_bincode(&req).unwrap();
+        let Bytes { value: req } = req.into_inner();
+        let package: Package;
+
+        let req = match Req::from_bincode(&req) {
+            Ok(req) => match req.is_valid() {
+                true => req,
+                false => {
+                    package = Err(Error::InvalidRequest);
+                    return prepare(package);
+                }
+            },
+            Err(_) => {
+                package = Err(Error::InvalidBincode);
+                return prepare(package);
+            }
+        };
 
         let mut conn = self.db.get_conn();
 
@@ -36,20 +51,32 @@ impl Trait for Service {
                     .returning(id)
                     .get_result::<i32>(conn)
             }) {
-                Err(_) => todo!("Error handling for database error"),
+                Err(_) => {
+                    package = Err(Error::BasicEventNotFound);
+                    return prepare(package);
+                }
                 Ok(id) => id,
             }
         };
 
-        Ok(Response::new(Bytes {
-            value: api_types::availabilities::create::Res { id }.to_bincode(),
-        }))
+        package = Ok(Res { id });
+
+        prepare(package)
     }
 
     async fn get(&self, req: Request<Bytes>) -> Result<Response<Bytes>, Status> {
-        let Bytes { value: req } = req.into_inner();
+        use api_types::availabilities::get::*;
 
-        let req = api_types::availabilities::get::Req::from_bincode(&req).unwrap();
+        let Bytes { value: req } = req.into_inner();
+        let package: Package;
+
+        let req = match Req::from_bincode(&req) {
+            Ok(req) => req,
+            Err(_) => {
+                package = Err(Error::InvalidBincode);
+                return prepare(package);
+            }
+        };
 
         let mut conn = self.db.get_conn();
 
@@ -61,7 +88,10 @@ impl Trait for Service {
                     .filter(basic_event.eq(req.basic_event))
                     .get_results::<(i32, String, String, Vec<u8>)>(conn)
             }) {
-                Err(_) => todo!("Error handling for database error"),
+                Err(_) => {
+                    package = Err(Error::BasicEventNotFound);
+                    return prepare(package);
+                }
                 Ok(results) => results
                     .into_iter()
                     .map(|r| {
@@ -70,25 +100,40 @@ impl Trait for Service {
                         let availabilities =
                             api_types::availabilities::Availabilities::from_bincode(&r.3).unwrap();
 
-                        api_types::availabilities::get::Respondent {
+                        Respondent {
                             id,
                             name,
                             availabilities,
                         }
                     })
-                    .collect::<Vec<api_types::availabilities::get::Respondent>>(),
+                    .collect::<Vec<Respondent>>(),
             }
         };
 
-        Ok(Response::new(Bytes {
-            value: api_types::availabilities::get::Res { respondents }.to_bincode(),
-        }))
+        package = Ok(Res { respondents });
+
+        prepare(package)
     }
 
     async fn update(&self, req: Request<Bytes>) -> Result<Response<Bytes>, Status> {
-        let Bytes { value: req } = req.into_inner();
+        use api_types::availabilities::update::*;
 
-        let req = api_types::availabilities::update::Req::from_bincode(&req).unwrap();
+        let Bytes { value: req } = req.into_inner();
+        let package: Package;
+
+        let req = match Req::from_bincode(&req) {
+            Ok(req) => match req.is_valid() {
+                true => req,
+                false => {
+                    package = Err(Error::InvalidRequest);
+                    return prepare(package);
+                }
+            },
+            Err(_) => {
+                package = Err(Error::InvalidBincode);
+                return prepare(package);
+            }
+        };
 
         let mut conn = self.db.get_conn();
 
@@ -107,20 +152,32 @@ impl Trait for Service {
                     .returning(id)
                     .get_result::<i32>(conn)
             }) {
-                Err(_) => todo!("Error handling for database error"),
+                Err(_) => {
+                    package = Err(Error::BasicEventOrRespondentNotFound);
+                    return prepare(package);
+                }
                 Ok(id) => id,
             }
         };
 
-        Ok(Response::new(Bytes {
-            value: api_types::availabilities::update::Res { id }.to_bincode(),
-        }))
+        package = Ok(Res { id });
+
+        prepare(package)
     }
 
     async fn delete(&self, req: Request<Bytes>) -> Result<Response<Bytes>, Status> {
-        let Bytes { value: req } = req.into_inner();
+        use api_types::availabilities::delete::*;
 
-        let req = api_types::availabilities::delete::Req::from_bincode(&req).unwrap();
+        let Bytes { value: req } = req.into_inner();
+        let package: Package;
+
+        let req = match Req::from_bincode(&req) {
+            Ok(req) => req,
+            Err(_) => {
+                package = Err(Error::InvalidBincode);
+                return prepare(package);
+            }
+        };
 
         let mut conn = self.db.get_conn();
 
@@ -133,11 +190,12 @@ impl Trait for Service {
                 .filter(basic_event.eq(req.basic_event))
                 .execute(conn)
         }) {
-            todo!("Error handling for database error")
+            package = Err(Error::BasicEventOrRespondentNotFound);
+            return prepare(package);
         }
 
-        Ok(Response::new(Bytes {
-            value: api_types::availabilities::delete::Res {}.to_bincode(),
-        }))
+        package = Ok(Res {});
+
+        prepare(package)
     }
 }

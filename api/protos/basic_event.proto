@@ -2,11 +2,9 @@ syntax = "proto3";
 
 package basic_event;
 
-service BasicEvent {
-  rpc Create (Bytes) returns (Bytes) {}
-  rpc Get (Bytes) returns (Bytes) {}
-}
+import "common.proto";
 
-message Bytes {
-  bytes value = 1;
+service BasicEvent {
+  rpc Create (common.Bytes) returns (common.Bytes) {}
+  rpc Get (common.Bytes) returns (common.Bytes) {}
 }

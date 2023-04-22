@@ -28,6 +28,8 @@ pub trait Bincoded {
     }
 }
 
+impl<T, E> Bincoded for Result<T, E> {}
+
 pub mod prelude {
     pub use super::{Bincoded, Validate};
 }

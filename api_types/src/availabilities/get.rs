@@ -1,5 +1,13 @@
 use super::*;
 
+pub type Package = Result<Res, Error>;
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum Error {
+    InvalidBincode,
+    BasicEventNotFound,
+}
+
 #[derive(Deserialize, Serialize)]
 pub struct Req {
     pub basic_event: String,

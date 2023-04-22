@@ -5,7 +5,7 @@ fn main() -> std::io::Result<()> {
         .build_server(true)
         .build_client(false)
         .compile(
-            &["basic_event.proto", "availabilities.proto"],
+            &["basic_event.proto", "availabilities.proto", "common.proto"],
             &["../api/protos"],
         )?;
 
