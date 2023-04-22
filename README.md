@@ -29,6 +29,9 @@ cargo run --package api
 
 Running CSR:
 ```powershell
+cd csr
+npm install
+cd ..
 tailwindcss -c ./csr/tailwind.config.js -o ./csr/tailwind.css -w
 trunk serve ./csr/index.html -w ./
 ```
