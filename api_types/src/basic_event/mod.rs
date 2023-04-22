@@ -53,18 +53,3 @@ impl Validate for When {
         true
     }
 }
-
-impl Validate for Name {
-    fn is_valid(&self) -> bool {
-        if self.len() < 3 || self.len() > 32 {
-            return false;
-        }
-
-        // Require only alphanumeric characters and spaces
-        if !self.chars().all(|c| c.is_alphanumeric() || c == ' ') {
-            return false;
-        }
-
-        true
-    }
-}

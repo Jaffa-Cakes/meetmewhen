@@ -4,11 +4,25 @@ use super::*;
 pub struct Req {
     pub id: i32,
     pub basic_event: String,
-    pub name: String,
+    pub name: Name,
     pub availabilities: Availabilities,
 }
 
 impl Bincoded for Req {}
+
+impl Validate for Req {
+    fn is_valid(&self) -> bool {
+        if !self.name.is_valid() {
+            return false;
+        }
+
+        if !self.availabilities.is_valid() {
+            return false;
+        }
+
+        true
+    }
+}
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Res {
