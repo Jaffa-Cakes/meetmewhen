@@ -1,0 +1,23 @@
+[package]
+name = "api"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+api_types ={ path = "../api_types" }
+
+tonic = "0.9"
+tonic-web = "0.9"
+prost = "0.11"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+tower-http = { version = "0.3", default-features = false, features = ["cors"] }
+http = "0.2"
+diesel = { version = "2", features = ["postgres", "r2d2", "time"] }
+diesel_migrations = "2"
+dotenvy = "0.15"
+time = "0.3"
+num_cpus = "1"
+rand = "0.8"
+
+[build-dependencies]
+tonic-build = "0.9"

@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package basic_event;
+
+service BasicEvent {
+  rpc Create (Bytes) returns (Bytes) {}
+  rpc Get (Bytes) returns (Bytes) {}
+}
+
+message Bytes {
+  bytes value = 1;
+}

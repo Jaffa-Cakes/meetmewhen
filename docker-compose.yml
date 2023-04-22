@@ -1,0 +1,60 @@
+version: '3.9'
+
+name: tidsync
+
+services:
+  api:
+    container_name: tidsync-api
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    environment:
+      DATABASE_URL: postgres://admin:password@tidsync-db:5432/tidsync
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./:/app
+    ports:
+      - "127.0.0.1:50052:50052"
+
+  csr:
+    container_name: tidsync-csr
+    build:
+      context: .
+      dockerfile: csr/Dockerfile
+    volumes:
+      - ./:/app
+    ports:
+      - "127.0.0.1:8080:8080"
+
+  ssr:
+    container_name: tidsync-ssr
+    build:
+      context: .
+      dockerfile: ssr/Dockerfile
+    volumes:
+      - ./:/app
+    ports:
+      - "127.0.0.1:80:80"
+
+  db:
+    container_name: tidsync-db
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: admin
+      POSTGRES_DB: tidsync
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: "psql -U admin -lqt | cut -d \\| -f 1 | grep -qw tidsync"
+      interval: 250ms
+      timeout: 3s
+      retries: 40
+      start_period: 30s
+    ports:
+      - "127.0.0.1:5432:5432"
+
+volumes:
+  db_data:
