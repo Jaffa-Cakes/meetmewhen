@@ -76,4 +76,26 @@ impl Service {
             Err(_) => todo!("Handle error"),
         }
     }
+
+    pub async fn delete(
+        req: api_types::availabilities::delete::Req,
+    ) -> Result<api_types::availabilities::delete::Res, ()> {
+        let mut client = Service::client();
+
+        match client
+            .delete(Bytes {
+                value: req.to_bincode(),
+            })
+            .await
+        {
+            Ok(res) => {
+                match api_types::availabilities::delete::Res::from_bincode(&res.into_inner().value)
+                {
+                    Ok(res) => Ok(res),
+                    Err(_) => todo!("Handle error"),
+                }
+            }
+            Err(_) => todo!("Handle error"),
+        }
+    }
 }
