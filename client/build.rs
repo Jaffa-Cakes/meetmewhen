@@ -3,7 +3,7 @@ fn main() -> std::io::Result<()> {
         .build_server(false)
         .build_client(true)
         .compile(
-            &["basic_event.proto", "availabilities.proto"],
+            &["basic_event.proto", "availabilities.proto", "common.proto"],
             &["../api/protos"],
         )
 }

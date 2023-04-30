@@ -272,6 +272,7 @@ dependencies = [
  "num_cpus",
  "prost",
  "rand",
+ "serde",
  "time",
  "tokio",
  "tonic 0.9.1",

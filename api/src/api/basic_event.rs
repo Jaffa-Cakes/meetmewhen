@@ -18,21 +18,24 @@ impl Service {
 #[tonic::async_trait]
 impl Trait for Service {
     async fn create(&self, req: Request<Bytes>) -> Result<Response<Bytes>, Status> {
-        let Bytes { value: req } = req.into_inner();
+        use api_types::basic_event::create::*;
 
-        let req = match api_types::basic_event::create::Req::from_bincode(&req) {
+        let Bytes { value: req } = req.into_inner();
+        let package: Package;
+
+        let req = match Req::from_bincode(&req) {
             Ok(req) => match req.is_valid() {
                 true => req,
-                false => todo!("Error handling for invalid request"),
+                false => {
+                    package = Err(Error::InvalidRequest);
+                    return prepare(package);
+                }
             },
-            Err(_) => todo!("Error handling for invalid bincode"),
+            Err(_) => {
+                package = Err(Error::InvalidBincode);
+                return prepare(package);
+            }
         };
-
-        let id_constructed: String = thread_rng()
-            .sample_iter(&Alphanumeric)
-            .take(8)
-            .map(char::from)
-            .collect();
 
         let tz = req.timezone.as_hms();
         let tz = format!(
@@ -45,37 +48,54 @@ impl Trait for Service {
 
         let mut conn = self.db.get_conn();
 
-        {
+        let mut id_constructed: String;
+
+        loop {
             use diesel::dsl::*;
             use schema::basic_event::dsl::*;
 
-            if let Err(_) = conn.transaction(|conn| {
+            id_constructed = thread_rng()
+                .sample_iter(&Alphanumeric)
+                .take(8)
+                .map(char::from)
+                .collect();
+
+            let result = conn.transaction(|conn| {
                 insert_into(basic_event)
                     .values((
                         id.eq(&id_constructed),
-                        name.eq(req.name),
+                        name.eq(&req.name),
                         when.eq(req.when.to_bincode()),
                         no_ealier.eq(req.no_earlier),
                         no_later.eq(req.no_later),
-                        timezone.eq(tz),
+                        timezone.eq(&tz),
                     ))
                     .execute(conn)
-            }) {
-                todo!("Error handling for duplicate id insertion")
+            });
+
+            // If the key is not unique, we will need to try again
+            if result.is_ok() {
+                break;
             }
         }
 
-        Ok(Response::new(Bytes {
-            value: api_types::basic_event::create::Res { id: id_constructed }.to_bincode(),
-        }))
+        package = Ok(Res { id: id_constructed });
+
+        prepare(package)
     }
 
     async fn get(&self, req: Request<Bytes>) -> Result<Response<Bytes>, Status> {
-        let Bytes { value: req } = req.into_inner();
+        use api_types::basic_event::get::*;
 
-        let req = match api_types::basic_event::get::Req::from_bincode(&req) {
+        let Bytes { value: req } = req.into_inner();
+        let package: Package;
+
+        let req = match Req::from_bincode(&req) {
             Ok(req) => req,
-            Err(_) => todo!("Error handling for invalid bincode"),
+            Err(_) => {
+                package = Err(Error::InvalidBincode);
+                return prepare(package);
+            }
         };
 
         let mut conn = self.db.get_conn();
@@ -97,37 +117,39 @@ impl Trait for Service {
                 Ok((id, name, when, no_earlier, no_later, timezone, created)) => {
                     let when = match api_types::basic_event::When::from_bincode(&when) {
                         Ok(when) => when,
-                        Err(_) => todo!("Error handling for invalid bincode"),
+                        Err(_) => panic!("Error handling for invalid bincode"),
                     };
                     let timezone = {
                         let hours = match timezone.split(':').next() {
                             Some(hours) => match hours.parse::<i8>() {
                                 Ok(hours) => hours,
-                                Err(_) => todo!("Error handling for invalid timezone"),
+                                Err(_) => panic!("Error handling for invalid timezone"),
                             },
-                            None => todo!("Error handling for invalid timezone"),
+                            None => panic!("Error handling for invalid timezone"),
                         };
 
                         match time::UtcOffset::from_hms(hours, 0, 0) {
                             Ok(timezone) => timezone,
-                            Err(_) => todo!("Error handling for invalid bincode"),
+                            Err(_) => panic!("Error handling for invalid bincode"),
                         }
                     };
 
-                    Ok(Response::new(Bytes {
-                        value: api_types::basic_event::get::Res {
-                            id,
-                            name,
-                            when,
-                            no_earlier,
-                            no_later,
-                            timezone,
-                            created,
-                        }
-                        .to_bincode(),
-                    }))
+                    package = Ok(Res {
+                        id,
+                        name,
+                        when,
+                        no_earlier,
+                        no_later,
+                        timezone,
+                        created,
+                    });
+
+                    prepare(package)
                 }
-                Err(_) => todo!("Error handling for not found"),
+                Err(_) => {
+                    package = Err(Error::NotFound);
+                    return prepare(package);
+                }
             }
         }
     }

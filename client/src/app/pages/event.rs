@@ -1,5 +1,3 @@
-use api_types::availabilities::delete;
-
 use super::*;
 
 ////////////////////////

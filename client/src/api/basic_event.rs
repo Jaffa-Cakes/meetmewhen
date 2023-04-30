@@ -14,12 +14,13 @@ impl Service {
 
     pub async fn create(
         req: api_types::basic_event::create::Req,
-    ) -> Result<api_types::basic_event::create::Res, ()> {
+    ) -> api_types::basic_event::create::Package {
+        use api_types::basic_event::create::*;
+
         let mut client = Service::client();
 
         if !req.is_valid() {
-            log::info!("Data is invalid.");
-            todo!("Handle error");
+            todo!("Invalid request data");
         }
 
         match client
@@ -28,19 +29,19 @@ impl Service {
             })
             .await
         {
-            Ok(res) => {
-                match api_types::basic_event::create::Res::from_bincode(&res.into_inner().value) {
-                    Ok(res) => Ok(res),
-                    Err(_) => todo!("Handle error"),
-                }
-            }
-            Err(_) => todo!("Handle error"),
+            Ok(res) => match Package::from_bincode(&res.into_inner().value) {
+                Ok(res) => res,
+                Err(_) => todo!("Failed to deserialize bincoded response from API"),
+            },
+            Err(_) => todo!("API failed to respond"),
         }
     }
 
     pub async fn get(
         req: api_types::basic_event::get::Req,
-    ) -> Result<api_types::basic_event::get::Res, ()> {
+    ) -> api_types::basic_event::get::Package {
+        use api_types::basic_event::get::*;
+
         let mut client = Service::client();
 
         match client
@@ -49,13 +50,11 @@ impl Service {
             })
             .await
         {
-            Ok(res) => {
-                match api_types::basic_event::get::Res::from_bincode(&res.into_inner().value) {
-                    Ok(res) => Ok(res),
-                    Err(_) => todo!("Handle error"),
-                }
-            }
-            Err(err) => todo!("Handle error: {:#?}", err),
+            Ok(res) => match Package::from_bincode(&res.into_inner().value) {
+                Ok(res) => res,
+                Err(_) => todo!("Failed to deserialize bincoded response from API"),
+            },
+            Err(_) => todo!("API failed to respond"),
         }
     }
 }

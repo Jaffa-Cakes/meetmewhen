@@ -62,3 +62,11 @@ mod server {
         Ok(())
     }
 }
+
+fn prepare<T: api_types::Bincoded + serde::Serialize>(
+    res: T,
+) -> Result<Response<api::common::Bytes>, Status> {
+    Ok(Response::new(api::common::Bytes {
+        value: res.to_bincode(),
+    }))
+}
