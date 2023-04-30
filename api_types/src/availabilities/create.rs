@@ -4,7 +4,7 @@ pub type Package = Result<Res, Error>;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Error {
-    BasicEventNotFound,
+    BasicEventNotFoundOrDuplicateName,
     InvalidRequest,
     InvalidBincode,
 }

@@ -52,7 +52,7 @@ impl Trait for Service {
                     .get_result::<i32>(conn)
             }) {
                 Err(_) => {
-                    package = Err(Error::BasicEventNotFound);
+                    package = Err(Error::BasicEventNotFoundOrDuplicateName);
                     return prepare(package);
                 }
                 Ok(id) => id,
