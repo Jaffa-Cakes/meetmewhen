@@ -1,14 +1,12 @@
+# meetmewhen
+
+This is a basic Rust clone of when2meet.com.
+
 # To-Do
 
-meetmewhen.com ?
+There are various things I have yet to complete in this project, please look here to view everything that needs to be done: https://github.com/users/Jaffa-Cakes/projects/3
 
-- Enable http 2 on Actix AND Tonic
-- Add sitemap generator
-- Add PWA Support
-- Add Meta Description Support
-- Add title description support
-
-Maybe add meta desc and title desc support by using the route enum and modifying the html?
+Various things are a little broken and not fixed as this is just a small proof of concept, you will likely have trouble running this application as it is not yet a fully fleshed out prototype.
 
 ## Useful Commands
 
