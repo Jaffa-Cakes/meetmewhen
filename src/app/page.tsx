@@ -1,8 +1,11 @@
 'use client'
 
+import { createEvent } from './actions'
+
 import ExpandingInput from '@/components/expanding-input'
 
 export default function Home() {
+
   return (
     <main>
       <div className='flex flex-col justify-evenly h-screen items-center'>
@@ -65,7 +68,9 @@ export default function Home() {
             </div>
           </div>
 
-          <button type='submit' className='bg-transparent text-green-600 rounded w-full border border-green-600 mt-4 py-2 px-4 hover:bg-green-900 hover:text-color text-2xl'>Submit</button>
+          <button type='button' className='bg-transparent text-green-600 rounded w-full border border-green-600 mt-4 py-2 px-4 hover:bg-green-900 hover:text-color text-2xl' onClick={async () => {
+        await createEvent('Test Event', 9, 5, 'WEEKDAYS');
+      }}>Create</button>
         </div>
       </div>
     </main>
