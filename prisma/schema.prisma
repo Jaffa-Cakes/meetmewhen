@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:postgres@localhost:5432/meet_me_when?schema=public"
+}
+
+enum EventType {
+  DATES
+  WEEKDAYS
+}
+
+enum WeekdayName {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model Event {
+  id        String      @id @default(uuid())
+  name      String
+  noEarlierThan Int
+  noLaterThan Int
+  type EventType
+
+  dates Date[]
+  weekdays Weekday[]
+  responders Responder[]
+}
+
+model Date {
+  id Int @id @default(autoincrement())
+  date DateTime
+  eventId String
+  event Event @relation(fields: [eventId], references: [id])
+
+  availabilities DateAvailability[]
+}
+
+model Weekday {
+  id Int @id @default(autoincrement())
+  weekday WeekdayName
+  eventId String
+  event Event @relation(fields: [eventId], references: [id])
+
+  availabilities WeekdayAvailability[]
+}
+
+model Responder {
+  id        Int      @id @default(autoincrement())
+  name      String
+  eventId String
+  event Event @relation(fields: [eventId], references: [id])
+
+  dateAvailabilities DateAvailability[]
+  weekdayAvailabilities WeekdayAvailability[]
+}
+
+model DateAvailability {
+  @@id(fields: [responderId, dateId])
+
+  fromTime Int
+  toTime Int
+  responderId Int
+  responder Responder @relation(fields: [responderId], references: [id])
+  dateId Int
+  date Date @relation(fields: [dateId], references: [id])
+}
+
+model WeekdayAvailability {
+  @@id(fields: [responderId, weekdayId])
+
+  fromTime Int
+  toTime Int
+  responderId Int
+  responder Responder @relation(fields: [responderId], references: [id])
+  weekdayId Int
+  weekday Weekday @relation(fields: [weekdayId], references: [id])
+}
