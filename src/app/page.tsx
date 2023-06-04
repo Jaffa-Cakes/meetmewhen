@@ -1,17 +1,19 @@
 'use client'
 
+import { FormEventHandler } from 'react'
 import { createEvent } from './actions'
 
 import ExpandingInput from '@/components/expanding-input'
 
 export default function Home() {
 
+
   return (
     <main>
       <div className='flex flex-col justify-evenly h-screen items-center'>
         <h1 className='text-6xl font-semibold text-center'>Meet Me When</h1>
 
-        <div className='font-medium'>
+        <form action={createEvent} className='font-medium'>
           <div className='bg-color px-5 py-2 rounded-t-xl mb-3 w-min text-4xl'>
             <ExpandingInput placeholder='Event Name' minWidth={9}/>
           </div>
@@ -20,7 +22,7 @@ export default function Home() {
             <div>
               <div className='bg-color px-4 py-2 rounded-t-xl mb-2 w-min'>
                 <div className="inline-block relative">
-                  <select className='bg-transparent focus:outline-none focus:ring-0 cursor-pointer'>
+                  <select name='type' className='bg-transparent focus:outline-none focus:ring-0 cursor-pointer'>
                     <option value='weekdays'>Weekdays</option>
                     <option value='dates'>Dates</option>
                   </select>
@@ -35,9 +37,9 @@ export default function Home() {
                   <label className='block'>No Earlier Than</label>
                 </div>
                 <div className='bg-color px-4 py-2 rounded-b-xl rounded-r-xl mb-4 w-min'>
-                  <select className='bg-transparent focus:outline-none focus:ring-0 cursor-pointer w-72'>
-                    <option value='9am'>9:00 AM</option>
-                    <option value='10am'>10:00 AM</option>
+                  <select name='noEarlierThan' className='bg-transparent focus:outline-none focus:ring-0 cursor-pointer w-72'>
+                    <option value='9'>9:00 AM</option>
+                    <option value='10'>10:00 AM</option>
                   </select>
                 </div>
               </div>
@@ -47,9 +49,9 @@ export default function Home() {
                   <label className='block'>No Later Than</label>
                 </div>
                 <div className='bg-color px-4 py-2 rounded-b-xl rounded-r-xl mb-4 w-min'>
-                  <select className='bg-transparent focus:outline-none focus:ring-0 cursor-pointer w-72'>
-                    <option value='5pm'>5:00 PM</option>
-                    <option value='6pm'>6:00 PM</option>
+                  <select name='noLaterThan' className='bg-transparent focus:outline-none focus:ring-0 cursor-pointer w-72'>
+                    <option value='5'>5:00 PM</option>
+                    <option value='6'>6:00 PM</option>
                   </select>
                 </div>
               </div>
@@ -60,18 +62,16 @@ export default function Home() {
                 </div>
                 <div className='bg-color px-4 py-2 rounded-b-xl rounded-r-xl mb-4 w-min'>
                   <select className='bg-transparent focus:outline-none focus:ring-0 cursor-pointer w-72'>
-                    <option value='5pm'>Australia/Melbourne</option>
-                    <option value='6pm'>Australia/Perth</option>
+                    <option value='australia/melbourne'>Australia/Melbourne</option>
+                    <option value='australia/perth'>Australia/Perth</option>
                   </select>
                 </div>
               </div>
             </div>
           </div>
 
-          <button type='button' className='bg-transparent text-green-600 rounded w-full border border-green-600 mt-4 py-2 px-4 hover:bg-green-900 hover:text-color text-2xl' onClick={async () => {
-        await createEvent('Test Event', 9, 5, 'WEEKDAYS');
-      }}>Create</button>
-        </div>
+          <button type='submit' className='bg-transparent text-green-600 rounded w-full border border-green-600 mt-4 py-2 px-4 hover:bg-green-900 hover:text-color text-2xl'>Create</button>
+        </form>
       </div>
     </main>
   )

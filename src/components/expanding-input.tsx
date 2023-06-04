@@ -30,6 +30,7 @@ export default function ExpandingInput(props: Props) {
           value={inputValue}
           onChange={handleInputChange}
           placeholder={props.placeholder}
+          name='name'
           autoFocus
         />
       </div>
