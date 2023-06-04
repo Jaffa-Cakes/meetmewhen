@@ -1,19 +1,42 @@
 'use client'
 
-import { FormEventHandler } from 'react'
 import { createEvent } from './actions'
+import { EventType } from '@prisma/client'
 
 import ExpandingInput from '@/components/expanding-input'
+import { useToast } from '@chakra-ui/react'
+import { useRouter } from 'next/navigation'
 
-export default function Home() {
+export default function Page() {
+  const toast = useToast()
+  const router = useRouter()
 
+  async function submitForm(data: FormData) {
+
+    let name = data.get('name') as string
+    let noEarlierThan = parseInt(data.get('noEarlierThan') as string)
+    let noLaterThan = parseInt(data.get('noLaterThan') as string)
+    let type = (data.get('type') as string).toUpperCase() as EventType
+
+    let event = await createEvent(name, noEarlierThan, noLaterThan, type)
+
+    toast({
+      title: 'Event Created',
+      description: 'Your event has been created.',
+      status: 'success',
+      duration: 5000,
+      isClosable: true,
+    })
+
+    router.push('/event/' + event.id)
+  }
 
   return (
     <main>
       <div className='flex flex-col justify-evenly h-screen items-center'>
         <h1 className='text-6xl font-semibold text-center'>Meet Me When</h1>
 
-        <form action={createEvent} className='font-medium'>
+        <form action={submitForm} className='font-medium'>
           <div className='bg-color px-5 py-2 rounded-t-xl mb-3 w-min text-4xl'>
             <ExpandingInput placeholder='Event Name' minWidth={9}/>
           </div>
