@@ -1,0 +1,11 @@
+[workspace]
+
+members = [
+    "servers/docker",
+    "servers/lambda",
+    "ui",
+    "components",
+    "api",
+    "databases/docker",
+    "databases/lambda",
+]
