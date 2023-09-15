@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
+    "toolbox",
     "servers/docker",
     "servers/lambda",
     "servers/local",
