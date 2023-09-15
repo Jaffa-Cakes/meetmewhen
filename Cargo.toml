@@ -3,9 +3,14 @@
 members = [
     "servers/docker",
     "servers/lambda",
+    "servers/local",
     "ui",
     "components",
     "api",
     "databases/docker",
     "databases/lambda",
+    "databases/local",
 ]
+
+[workspace.dependencies]
+leptos = "0.5.0-rc1"
